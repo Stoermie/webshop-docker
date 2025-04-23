@@ -1,0 +1,53 @@
+/* src/components/CustomerProfile.css */
+.profile-container {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    background: #f8f8f8;
+  }
+  .profile-card {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+  }
+  .profile-name {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  .field {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .label {
+    font-weight: 600;
+    color: #555;
+  }
+  .order-list {
+    margin-top: 1rem;
+    padding-left: 1rem;
+    text-align: left;
+  }
+  .order-list > li {
+    margin-bottom: 0.75rem;
+  }
+  .order-list li ul {
+    margin-top: 0.25rem;
+    padding-left: 1.5rem;
+  }
+  .error {
+    color: #c00;
+    font-weight: 500;
+  }
+  

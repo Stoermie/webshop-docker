@@ -1,0 +1,132 @@
+.cart-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .cart-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .cart-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .cart-item:last-child {
+    border-bottom: none;
+  }
+  
+  .item-image {
+    width: 80px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .item-details {
+    flex: 2;
+    padding-left: 16px;
+  }
+  
+  .item-name {
+    font-size: 1.1rem;
+    margin: 0;
+    color: #222;
+  }
+  
+  .item-price {
+    margin: 4px 0 0;
+    color: #777;
+  }
+  
+  .item-qty {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 24px;
+  }
+  
+  .qty-btn {
+    border: none;
+    background: #f0f0f0;
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+    line-height: 1;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .qty-input {
+    width: 40px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 0;
+  }
+  
+  .item-total {
+    flex: 1;
+    text-align: right;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .remove-btn {
+    margin-left: 16px;
+    background: none;
+    border: none;
+    color: #c0392b;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  
+  .cart-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+  }
+  
+  .cart-sum {
+    font-size: 1.2rem;
+    color: #333;
+  }
+  
+  .checkout-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .checkout-btn:hover {
+    background: #219653;
+  }
+  
+  .empty-msg {
+    text-align: center;
+    color: #777;
+    font-size: 1.1rem;
+    margin: 40px 0;
+  }
+  

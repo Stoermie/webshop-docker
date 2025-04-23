@@ -1,0 +1,128 @@
+version: "3.8"
+
+services:
+  postgresdb:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: piData
+      POSTGRES_PASSWORD: senta
+      POSTGRES_DB: pidb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - type: bind
+        source: ./db-init
+        target: /docker-entrypoint-initdb.d
+        read_only: true
+    networks:
+      - webshop-net
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U piData -d pidb -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  catalog-service:
+    build: ./catalog-service
+    container_name: catalog_service
+    working_dir: /app
+    volumes:
+      - ./catalog-service:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    networks:
+      - webshop-net
+
+  cart-service:
+    build: ./cart-service
+    container_name: cart_service
+    working_dir: /app
+    volumes:
+      - ./cart-service:/app
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    networks:
+      - webshop-net
+
+  customer-service:
+    build: ./customer-service
+    container_name: customer_service
+    working_dir: /app
+    volumes:
+      - ./customer-service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload --app-dir /app
+    environment:
+      - DATABASE_URL=postgresql://piData:senta@postgresdb:5432/customer_db
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    networks:
+      - webshop-net
+
+  order-service:
+    build: ./order-service
+    container_name: order_service
+    working_dir: /app
+    volumes:
+      - ./order-service:/app
+    ports:
+      - "8003:8003"
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    networks:
+      - webshop-net
+
+  event_bus:
+    build: ./event-service
+    container_name: event_bus
+    working_dir: /app
+    volumes:
+      - ./event-service:/app
+    ports:
+      - "4005:4005"
+    depends_on:
+      - catalog-service
+      - cart-service
+      - customer-service
+      - order-service
+    networks:
+      - webshop-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev                # ← fährt den Dev‑Mode mit Hot‑Reload
+    container_name: webshop_frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules      # node_modules bleibt im Container
+    ports:
+      - "3001:3000"            # React‑Dev‑Server: localhost:3001
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - NPM_CONFIG_AUDIT=false
+      - NPM_CONFIG_FUND=false
+      - NODE_OPTIONS=--no-deprecation
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    networks:
+      - webshop-net
+
+volumes:
+  pgdata:
+
+networks:
+  webshop-net:

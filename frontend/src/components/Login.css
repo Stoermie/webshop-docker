@@ -1,0 +1,106 @@
+/* src/components/Login.css */
+
+/* Gesamte Seite: ein moderner Hintergrund, zentriert den Container */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    background: linear-gradient(135deg, #f4f4f8, #ffffff);
+    padding: 20px;
+  }
+  
+  /* Container mit Schlagschatten und abgerundeten Ecken */
+  .login-container {
+    width: 100%;
+    max-width: 400px;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* Überschrift */
+  .login-container h1 {
+    margin-bottom: 20px;
+    color: #2c2c2c;
+    font-size: 2em;
+  }
+  
+  /* Formular-Styles */
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* Gruppe für jedes Label und Input */
+  .form-group {
+    text-align: left;
+  }
+  
+  .form-group label {
+    font-size: 0.9em;
+    color: #2c2c2c;
+    margin-bottom: 5px;
+    display: block;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    transition: border 0.2s, box-shadow 0.2s;
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: #ef5b5b;
+    box-shadow: 0 0 5px rgba(239, 91, 91, 0.3);
+  }
+  
+  /* Buttons, abgestimmt auf das Farbkonzept */
+  .button {
+    padding: 10px 15px;
+    background-color: #ef5b5b;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .button:hover {
+    background-color: #da4040;
+  }
+  
+  /* Fehlermeldung */
+  .error {
+    color: red;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+  }
+  
+  /* Link für Registrierung */
+  .register-link {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #2c2c2c;
+  }
+  
+  .register-link span {
+    color: #ef5b5b;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+  }
+  
+  .register-link span:hover {
+    color: #da4040;
+  }
+  

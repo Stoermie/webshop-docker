@@ -1,0 +1,83 @@
+/* src/index.css */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #004990;
+  padding: 10px 20px;
+}
+
+.header a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2em;
+}
+
+.header .header-right img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+/* Produkt-Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-gap: 20px;
+}
+
+.product-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.product-card:hover {
+  transform: scale(1.02);
+}
+
+.product-card img {
+  width: 100%;
+  height: auto;
+  max-height: 350px;
+  object-fit: cover;
+}
+
+.product-card h3 {
+  margin: 10px 0;
+}
+
+/* Buchdetails */
+.details-container {
+  display: flex;
+  gap: 20px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.book-image {
+  max-width: 300px;
+  width: 100%;
+  border: 1px solid #ddd;
+}
+
+.book-info {
+  flex: 1;
+}
