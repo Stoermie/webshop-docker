@@ -1,63 +1,74 @@
 // src/components/Login.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
 import './Login.css';
 
 function Login() {
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (event) => {
-    event.preventDefault();
-    axios.post("http://192.168.178.122:8001/customers/login", { email, password })
-      .then(response => {
-        console.log("Login erfolgreich:", response.data);
-        localStorage.setItem("customerId", response.data.id)
-        navigate("/profile");  // Weiterleitung zum Kundenprofil
-      })
-      .catch(error => {
-        console.error("Login fehlgeschlagen:", error);
-        setErrorMsg("Ungültige Zugangsdaten, bitte erneut versuchen.");
-      });
+  const handleLogin = async e => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(
+        'http://192.168.178.122:8001/customers/login',
+        { email, password }
+      );
+      login(res.data.id);
+      navigate('/profile');
+    } catch {
+      setErrorMsg('Ungültige E-Mail oder Passwort.');
+    }
   };
-
 
   return (
     <div className="login-page">
-      <div className="login-container">
-        <h1>Login</h1>
-        {errorMsg && <p className="error">{errorMsg}</p>}
+      <div className="login-card">
+        <h1 className="login-title">Anmelden</h1>
+        {errorMsg && <div className="login-error">{errorMsg}</div>}
+
         <form onSubmit={handleLogin} className="login-form">
-          <div className="form-group">
-            <label htmlFor="email">E-Mail</label>
+          <label className="login-label">
+            E-Mail
             <input
-              id="email"
               type="email"
+              className="login-input"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="Deine E-Mail"
               required
             />
-          </div>
-          <div className="form-group">
-            <label htmlFor="password">Passwort</label>
+          </label>
+
+          <label className="login-label">
+            Passwort
             <input
-              id="password"
               type="password"
+              className="login-input"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Dein Passwort"
               required
             />
-          </div>
-          <button type="submit" className="button">Einloggen</button>
+          </label>
+
+          <button type="submit" className="login-button">
+            Einloggen
+          </button>
         </form>
-        <p className="register-link">
-          Noch kein Konto? <span onClick={() => navigate("/register")}>Jetzt registrieren</span>
-        </p>
+
+        <div className="login-footer">
+          Noch kein Konto?{' '}
+          <button
+            className="login-register"
+            onClick={() => navigate('/register')}
+          >
+            Jetzt registrieren
+          </button>
+        </div>
       </div>
     </div>
   );

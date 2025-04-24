@@ -1,106 +1,109 @@
 /* src/components/Login.css */
 
-/* Gesamte Seite: ein moderner Hintergrund, zentriert den Container */
+/* Vollbild-Hintergrund */
 .login-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 60vh;
-    background: linear-gradient(135deg, #f4f4f8, #ffffff);
-    padding: 20px;
-  }
-  
-  /* Container mit Schlagschatten und abgerundeten Ecken */
-  .login-container {
-    width: 100%;
-    max-width: 400px;
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    text-align: center;
-  }
-  
-  /* Überschrift */
-  .login-container h1 {
-    margin-bottom: 20px;
-    color: #2c2c2c;
-    font-size: 2em;
-  }
-  
-  /* Formular-Styles */
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  /* Gruppe für jedes Label und Input */
-  .form-group {
-    text-align: left;
-  }
-  
-  .form-group label {
-    font-size: 0.9em;
-    color: #2c2c2c;
-    margin-bottom: 5px;
-    display: block;
-  }
-  
-  .form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-    transition: border 0.2s, box-shadow 0.2s;
-  }
-  
-  .form-group input:focus {
-    outline: none;
-    border-color: #ef5b5b;
-    box-shadow: 0 0 5px rgba(239, 91, 91, 0.3);
-  }
-  
-  /* Buttons, abgestimmt auf das Farbkonzept */
-  .button {
-    padding: 10px 15px;
-    background-color: #ef5b5b;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 1em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .button:hover {
-    background-color: #da4040;
-  }
-  
-  /* Fehlermeldung */
-  .error {
-    color: red;
-    font-size: 0.9em;
-    margin-bottom: 10px;
-  }
-  
-  /* Link für Registrierung */
-  .register-link {
-    margin-top: 20px;
-    font-size: 0.9em;
-    color: #2c2c2c;
-  }
-  
-  .register-link span {
-    color: #ef5b5b;
-    cursor: pointer;
-    text-decoration: underline;
-    transition: color 0.2s;
-  }
-  
-  .register-link span:hover {
-    color: #da4040;
-  }
-  
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fa;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Card */
+.login-card {
+  background: #fff;
+  padding: 2.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+
+/* Titel */
+.login-title {
+  margin: 0 0 1rem;
+  font-size: 1.8rem;
+  color: #2d3748;
+}
+
+/* Fehlermeldung */
+.login-error {
+  margin-bottom: 1rem;
+  color: #e53e3e;
+  font-size: 0.9rem;
+}
+
+/* Formular */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Label + Input */
+.login-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 0.9rem;
+  color: #4a5568;
+}
+
+.login-input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  margin-top: 0.25rem;
+  font-size: 1rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-input:focus {
+  border-color: #d64b4b;
+  box-shadow: 0 0 0 3px rgba(214,75,75,0.15);
+  outline: none;
+}
+
+/* Einloggen-Button */
+.login-button {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: #d64b4b;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.login-button:hover {
+  background: #bf3f3f;
+}
+
+/* Footer (Registrieren) */
+.login-footer {
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.login-register {
+  background: none;
+  border: none;
+  color: #d64b4b;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+  padding: 0;
+  margin: 0;
+  transition: color 0.2s;
+}
+
+.login-register:hover {
+  color: #bf3f3f;
+}

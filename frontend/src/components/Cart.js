@@ -1,136 +1,138 @@
+// src/components/Cart.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './Cart.css'; // Styles siehe unten
+import { Link } from 'react-router-dom';
+import './Cart.css';
 
-function Cart() {
-  const [cart, setCart] = useState(null);
-  const [items, setItems] = useState([]);
-  const cartId = 1; // später durch eingeloggten User ersetzen
+export default function Cart() {
+  const [cartId, setCartId] = useState(null);
+  const [rawItems, setRawItems] = useState([]);   // Items vom Cart-Service
+  const [items, setItems] = useState([]);         // Items mit Artikel-Details
+  const [loading, setLoading] = useState(true);
 
-  // 1. Warenkorb‑Metadaten holen
-  const fetchCart = () => {
-    axios
-      .get(`http://192.168.178.122:8002/carts/${cartId}`)
-      .then(res => setCart(res.data))
-      .catch(err => console.error("Cart laden:", err));
+  // 1) Cart-ID holen/erzeugen
+  const getCartId = async () => {
+    let id = localStorage.getItem('cartId');
+    if (!id) {
+      const res = await axios.post('http://192.168.178.122:8002/carts/', {});
+      id = res.data.id;
+      localStorage.setItem('cartId', id);
+    }
+    setCartId(id);
+    return id;
   };
 
-  // 2. Beim Mounten einmal laden
-  useEffect(fetchCart, []);
-
-  // 3. Sobald sich cart ändert, Details aus Catalog holen
+  // 2) Roh-Items laden
   useEffect(() => {
-    if (!cart) return;
+    (async () => {
+      const id = await getCartId();
+      try {
+        const res = await axios.get(`http://192.168.178.122:8002/carts/${id}`);
+        setRawItems(res.data.items || []);
+      } catch {
+        setRawItems([]);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 3) Artikel-Details holen, sobald rawItems da sind
+  useEffect(() => {
+    if (rawItems.length === 0) {
+      setItems([]);
+      return;
+    }
     Promise.all(
-      cart.items.map(async item => {
+      rawItems.map(async it => {
         const res = await axios.get(
-          `http://192.168.178.122:8000/api/articles/${item.article_id}`
+          `http://192.168.178.122:8000/api/articles/${it.article_id}`
         );
         return {
-          ...item,
+          ...it,
           article: res.data
         };
       })
-    )
-      .then(setItems)
-      .catch(err => console.error("Details holen:", err));
-  }, [cart]);
+    ).then(setItems);
+  }, [rawItems]);
 
-  // 4. Menge updaten (PUT)
-  const updateQty = (itemId, delta) => {
+  // 4) Menge updaten
+  const updateQty = async (itemId, delta) => {
     const item = items.find(i => i.id === itemId);
     const newQty = item.quantity + delta;
     if (newQty < 1) return;
-    axios
-      .put(
-        `http://192.168.178.122:8002/carts/${cartId}/items/${itemId}`,
-        { article_id: item.article_id, quantity: newQty }
-      )
-      .then(fetchCart)
-      .catch(err => console.error("Menge updaten:", err));
+    await axios.put(
+      `http://192.168.178.122:8002/carts/${cartId}/items/${itemId}`,
+      { article_id: item.article_id, quantity: newQty }
+    );
+    // Nach update neu laden
+    const res = await axios.get(`http://192.168.178.122:8002/carts/${cartId}`);
+    setRawItems(res.data.items || []);
   };
 
-  // 5. Artikel entfernen (DELETE)
-  const removeItem = itemId => {
-    axios
-      .delete(`http://192.168.178.122:8002/carts/${cartId}/items/${itemId}`)
-      .then(fetchCart)
-      .catch(err => console.error("Entfernen:", err));
+  // 5) Item entfernen
+  const removeItem = async itemId => {
+    await axios.delete(
+      `http://192.168.178.122:8002/carts/${cartId}/items/${itemId}`
+    );
+    const res = await axios.get(`http://192.168.178.122:8002/carts/${cartId}`);
+    setRawItems(res.data.items || []);
   };
 
-  // 6. Gesamtsumme berechnen
-  const totalPrice = items.reduce(
+  if (loading) {
+    return <div className="cart-container"><p>Lade Warenkorb…</p></div>;
+  }
+
+  const total = items.reduce(
     (sum, i) => sum + i.quantity * i.article.price,
     0
   );
 
   return (
     <div className="cart-container">
-      <h1 className="cart-title">Dein Warenkorb</h1>
-
-      {items.length > 0 ? (
+      <h1>Warenkorb</h1>
+      {items.length === 0 ? (
+        <p>Dein Warenkorb ist leer.</p>
+      ) : (
         <>
-          <div className="cart-items">
+          <ul className="cart-items">
             {items.map(item => (
-              <div className="cart-item" key={item.id}>
+              <li key={item.id} className="cart-item">
                 <img
                   src={item.article.image_url || '/placeholder-book.png'}
                   alt={item.article.name}
                   className="item-image"
                 />
-                <div className="item-details">
+                <div className="item-info">
                   <p className="item-name">{item.article.name}</p>
                   <p className="item-price">
-                    {item.article.price.toFixed(2)} €
+                    {(item.article.price * item.quantity).toFixed(2)} €
                   </p>
                 </div>
                 <div className="item-qty">
-                  <button
-                    className="qty-btn"
-                    onClick={() => updateQty(item.id, -1)}
-                  >
-                    –
-                  </button>
-                  <input
-                    className="qty-input"
-                    type="text"
-                    value={item.quantity}
-                    readOnly
-                  />
-                  <button
-                    className="qty-btn"
-                    onClick={() => updateQty(item.id, +1)}
-                  >
-                    +
-                  </button>
+                  <button onClick={() => updateQty(item.id, -1)}>-</button>
+                  <span>{item.quantity}</span>
+                  <button onClick={() => updateQty(item.id, +1)}>+</button>
                 </div>
-                <p className="item-total">
-                  {(item.quantity * item.article.price).toFixed(2)} €
-                </p>
                 <button
                   className="remove-btn"
                   onClick={() => removeItem(item.id)}
                 >
                   Entfernen
                 </button>
-              </div>
+              </li>
             ))}
-          </div>
-
+          </ul>
           <div className="cart-footer">
-            <p className="cart-sum">
-              Zwischensumme: <strong>{totalPrice.toFixed(2)} €</strong>
+            <p className="cart-total">
+              Zwischensumme: <strong>{total.toFixed(2)} €</strong>
             </p>
-            <button className="checkout-btn">
-              Weiter zur Kasse
-            </button>
+            <Link to="/checkout" className="checkout-btn">
+              Zur Kasse
+            </Link>
           </div>
         </>
-      ) : (
-        <p className="empty-msg">Dein Warenkorb ist noch leer.</p>
       )}
     </div>
   );
 }
-
-export default Cart;

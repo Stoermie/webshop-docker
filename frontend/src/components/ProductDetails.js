@@ -1,61 +1,137 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+// src/components/ProductDetails.js
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
 import './ProductDetails.css';
 
-function ProductDetails() {
-  const { id } = useParams();
-  const [book, setBook] = useState(null);
+export default function ProductDetails() {
+  const { id: bookId } = useParams();
+  const { isLoggedIn } = useContext(AuthContext);
 
+  const [book, setBook] = useState(null);
+  const [recs, setRecs] = useState([]);
+  const [addingId, setAddingId] = useState(null);
+
+  // Buchdaten laden
   useEffect(() => {
     axios
-      .get(`http://192.168.178.122:8000/api/articles/${id}`)
-      .then(response => setBook(response.data))
-      .catch(error => console.error('Fehler beim Laden der Buchdetails:', error));
-  }, [id]);
+      .get(`http://192.168.178.122:8000/api/articles/${bookId}`)
+      .then(res => setBook(res.data))
+      .catch(console.error);
+  }, [bookId]);
 
-  const addToCart = () => {
+  // Empfehlungen laden
+  useEffect(() => {
     axios
-      .post(`http://192.168.178.122:8002/carts/1/items/`, {
-        article_id: book.article_id,
-        quantity: 1,
+      .get('http://192.168.178.122:8000/api/articles/')
+      .then(res => {
+        const others = res.data.filter(b => b.id !== +bookId);
+        const picks = [];
+        while (picks.length < 4 && others.length) {
+          const idx = Math.floor(Math.random() * others.length);
+          picks.push(others.splice(idx, 1)[0]);
+        }
+        setRecs(picks);
       })
-      .then(() => alert('Buch wurde zum Warenkorb hinzugefügt.'))
-      .catch(error => console.error('Fehler beim Hinzufügen zum Warenkorb:', error));
+      .catch(console.error);
+  }, [bookId]);
+
+  // Cart-ID-Helper
+  const getCartId = async () => {
+    let cartId = localStorage.getItem('cartId');
+    if (!cartId) {
+      const res = await axios.post('http://192.168.178.122:8002/carts/', {});
+      cartId = res.data.id;
+      localStorage.setItem('cartId', cartId);
+    }
+    return cartId;
   };
 
-  if (!book) {
-    return <div className="loading">Lade Buchdetails…</div>;
-  }
+  // Einheitliche Add-to-Cart-Funktion
+  const handleAddToCart = async (articleId) => {
+    if (!isLoggedIn) {
+      alert('Bitte einloggen, um Bücher in den Warenkorb zu legen.');
+      return;
+    }
+    setAddingId(articleId);
+    try {
+      const cartId = await getCartId();
+      await axios.post(
+        `http://192.168.178.122:8002/carts/${cartId}/items`,
+        { article_id: articleId, quantity: 1 }
+      );
+      alert('Buch zum Warenkorb hinzugefügt!');
+    } catch (err) {
+      console.error(err);
+      alert('Fehler beim Hinzufügen zum Warenkorb.');
+    } finally {
+      setAddingId(null);
+    }
+  };
+
+  if (!book) return <div className="pd-loading">Lade Buchdaten…</div>;
 
   return (
-    <div className="product-details">
-      <div className="product-image">
-        <img
-          src={book.image_url || '/placeholder-book.png'}
-          alt={book.name}
-        />
-      </div>
-      <div className="product-info">
-        <h1 className="product-title">{book.name}</h1>
-        {book.author && <p className="product-author">{book.author}</p>}
-        <p className="product-price">{book.price.toFixed(2)} €</p>
-        <p className="product-category">
-          {book.book_category || 'Keine Kategorie'}
-        </p>
-        {book.isbn && (
-          <p className="product-isbn"><strong>ISBN:</strong> {book.isbn}</p>
-        )}
-        <div className="product-description">
-          <h2>Beschreibung</h2>
-          <p>{book.description || 'Leider liegt keine Beschreibung vor.'}</p>
+    <div className="pd-page">
+      <div className="pd-main">
+        <div className="pd-image-col">
+          <img
+            src={book.image_url || '/placeholder-book.png'}
+            alt={book.name}
+            className="pd-image"
+          />
         </div>
-        <button className="btn-add-cart" onClick={addToCart}>
-          In den Warenkorb
-        </button>
+        <div className="pd-info-col">
+          <h1 className="pd-title">{book.name}</h1>
+          {book.author && <p className="pd-author">von {book.author}</p>}
+          <p className="pd-price">{book.price.toFixed(2)} €</p>
+          <p className="pd-category">{book.category || '—'}</p>
+          <p className="pd-isbn"><strong>ISBN:</strong> {book.isbn || '—'}</p>
+          <p className="pd-delivery"><strong>Lieferzeit:</strong> 1–3 Arbeitstage</p>
+
+          {/* Haupt-Add-to-Cart-Button */}
+          <button
+            className="pd-add-btn"
+            onClick={() => handleAddToCart(+bookId)}
+            disabled={addingId === +bookId}
+          >
+            {addingId === +bookId ? '…' : 'In den Warenkorb'}
+          </button>
+
+          {book.description && (
+            <div className="pd-desc">
+              <h2>Beschreibung</h2>
+              <p>{book.description}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Empfehlungen-Section nutzt jetzt recs und handleAddToCart */}
+      <div className="pd-recs">
+        <h2>Vielleicht interessieren Sie sich auch für</h2>
+        <div className="pd-recs-grid">
+          {recs.map(r => (
+            <div key={r.id} className="pd-rec-card">
+              <img
+                src={r.image_url || '/placeholder-book.png'}
+                alt={r.name}
+                className="pd-rec-img"
+              />
+              <p className="pd-rec-title">{r.name}</p>
+              <p className="pd-rec-price">{r.price.toFixed(2)} €</p>
+              <button
+                className="pd-rec-add"
+                onClick={() => handleAddToCart(r.id)}
+                disabled={addingId === r.id}
+              >
+                {addingId === r.id ? '…' : '🛒'}
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
-
-export default ProductDetails;

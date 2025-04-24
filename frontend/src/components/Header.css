@@ -1,131 +1,182 @@
 /* src/components/Header.css */
 
-/* 1. Header-Grundlayout mit Farbverlauf */
+:root {
+  /* Hauptfarben */
+  --gradient-start: #2c2c2c;
+  --gradient-end:  #ef5b5b;
+  --white:         #fff;
+  --text-light:    #f5f5f5;
+  --text-dark:     #2d3748;
+  --input-bg:      rgba(255,255,255,0.9);
+  --input-border:  #ccc;
+}
+
+/* 1) Header-Grundlayout */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(to right, #2c2c2c, #ef5b5b);
-  padding: 10px 20px;
-  color: #fff;
+  background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+  padding: 0 40px;
+  height: 80px;               /* statt 60px etwas luftiger */
+  color: var(--white);
   position: relative;
   z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* 2. Link um Logo und Text (Startseite) */
+/* 2) Link mit Logo + Schriftzug */
 .header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 .logo-link {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: #fff;
+  color: var(--white);
 }
 .header-logo {
-  width: 52px;
-  height: 52px;
+  width: 48px;                /* etwas größer */
+  height: 48px;
   object-fit: cover;
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 .logo-text {
-  font-size: 1.8em;
-  font-weight: 700;
-  color: #fff;
-  text-decoration: none;
-  font-family: 'MedievalSharp', cursive;
+  font-size: 2.2rem;          /* größerer Schriftzug */
+  font-weight: 800;
+  margin-left: 10px;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-/* 3. Zentrierter Bereich für die Suchleiste */
+/* 3) Suchleiste in der Mitte */
 .header-center {
   flex: 1;
   display: flex;
   justify-content: center;
-  margin: 0 2rem;
 }
-
-/* 4. Suchformular */
 .search-form {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border);
   border-radius: 999px;
+  background: var(--input-bg);
   overflow: hidden;
-  background-color: rgba(255,255,255,0.9);
   transition: box-shadow 0.3s;
+  max-width: 500px;
+  width: 100%;
 }
 .search-form:focus-within {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-
-/* 5. Such-Eingabefeld */
 .search-input {
+  flex: 1;
   border: none;
-  padding: 8px 12px;
+  padding: 8px 16px;
   font-size: 1rem;
   outline: none;
-  width: 240px;
   background: transparent;
-  color: #333;
+  color: var(--text-dark);
 }
 .search-input::placeholder {
-  color: #999;
+  color: #bbb;
 }
-
-/* 6. Suchbutton */
 .search-button {
   background: none;
   border: none;
-  padding: 8px 12px;
+  padding: 0 16px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.search-button span {
   font-size: 1.2rem;
-  color: #666;
-  transition: color 0.2s;
 }
-.search-button:hover span {
+.search-button:hover {
   color: #000;
 }
 
-/* 7. Bereich rechts für Icons (Login, Warenkorb) */
+/* 4) Rechts: Profil-Dropdown + Warenkorb */
 .header-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 30px;
 }
-.header-icon-container {
+
+/* Profil-Icon & Label untereinander */
+.header-profile {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  cursor: pointer;
 }
+.profile-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 4px;
+  transition: transform 0.2s;
+}
+.profile-icon:hover {
+  transform: scale(1.1);
+}
+.icon-caption {
+  font-size: 1rem;            /* einheitliche Größe */
+  font-family: 'Segoe UI', sans-serif;
+  font-weight: 600;
+  color: var(--white);
+}
+
+/* Dropdown-Menü – dunkler Hintergrund */
+.profile-menu {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end));
+  color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  min-width: 160px;
+  overflow: hidden;
+  z-index: 20;
+}
+.profile-menu .menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  text-decoration: none;
+  color: var(--white);
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.profile-menu .menu-item:hover {
+  background: rgba(255,255,255,0.15);
+}
+.profile-menu .logout-item {
+  color: #f56565;             /* leicht roter Ton für Abmelden */
+}
+.profile-menu .logout-item:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+/* Warenkorb-Icon & Label untereinander */
 .icon-link {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  color: #fff;
+  color: var(--white);
 }
-.header-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+.icon-link .header-icon {
+  width: 36px;
+  height: 36px;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-.icon-caption {
-  font-size: 0.75em;
-  margin-top: 3px;
+.icon-link .icon-caption {
+  color: var(--white);
 }
 .icon-link:hover .header-icon {
   transform: scale(1.1);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-}
-.icon-link:hover {
-  color: #eee;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 }

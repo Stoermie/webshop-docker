@@ -1,53 +1,155 @@
-/* src/components/CustomerProfile.css */
-.profile-container {
-    display: flex;
-    justify-content: center;
-    padding: 2rem;
-    background: #f8f8f8;
-  }
-  .profile-card {
-    width: 100%;
-    max-width: 400px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    padding: 1.5rem;
-    text-align: center;
-  }
-  .profile-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin-bottom: 1rem;
-  }
-  .profile-name {
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-    color: #333;
-  }
-  .field {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.75rem;
-  }
-  .label {
-    font-weight: 600;
-    color: #555;
-  }
-  .order-list {
-    margin-top: 1rem;
-    padding-left: 1rem;
-    text-align: left;
-  }
-  .order-list > li {
-    margin-bottom: 0.75rem;
-  }
-  .order-list li ul {
-    margin-top: 0.25rem;
-    padding-left: 1.5rem;
-  }
-  .error {
-    color: #c00;
-    font-weight: 500;
-  }
-  
+/* Basis-Container */
+.cp-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+/* Zentrierte Status-Meldungen */
+.cp-center {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+}
+.cp-error {
+  color: #c53030;
+}
+
+/* Profil-Karte */
+.cp-profile-card {
+  background: #fff;
+  padding: 2rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.cp-avatar {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+.cp-name {
+  margin: 0.5rem 0;
+  font-size: 1.6rem;
+}
+.cp-text {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+.cp-logout-btn {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  background: #d02a25;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+.cp-logout-btn:hover {
+  background: #a82822;
+}
+
+/* Sektionstitel */
+.cp-section-title {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+/* Grid für Bestellkarten */
+.cp-orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Einzelne Bestellkarte */
+.cp-order-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.cp-order-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Header der Order-Card */
+.cp-order-header {
+  background: #f7f7f7;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Items-Liste */
+.cp-order-items {
+  padding: 1rem;
+}
+.cp-item-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+.cp-item-img {
+  width: 50px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 0.75rem;
+}
+.cp-item-meta {
+  flex: 1;
+}
+.cp-item-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.cp-item-qty {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Preis je Zeile */
+.cp-item-price {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+/* Gesamt am Kartenende */
+.cp-order-total {
+  padding: 0.75rem 1rem;
+  background: #f7f7f7;
+  font-weight: 600;
+  text-align: right;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.95rem;
+}
+
+/* Löschen-Button */
+.cp-order-delete {
+  margin: 0.75rem 1rem;
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid #c53030;
+  color: #c53030;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.cp-order-delete:hover {
+  background: #c53030;
+  color: #fff;
+}

@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
     if (saved) setCustomerId(saved);
   }, []);
 
-  const login = (id) => {
+  const login = id => {
     localStorage.setItem('customerId', id);
     setCustomerId(id);
   };

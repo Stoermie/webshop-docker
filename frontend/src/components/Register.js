@@ -1,51 +1,115 @@
-// src/pages/Register.js
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './Register.css';
 
 function Register() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    address: '',
+    password: ''
+  });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const submitHandler = async e => {
+  const handleChange = e => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
+    setError('');
     try {
-      await axios.post('http://localhost:8001/customers/', { email, password });
+      await axios.post(
+        'http://192.168.178.122:8001/customers/',
+        {
+          name: form.name,
+          email: form.email,
+          address: form.address,
+          password: form.password
+        }
+      );
+      // Nach Registrierung zum Login weiterleiten
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Registrierung fehlgeschlagen.');
+      console.error('Registrierung fehlgeschlagen:', err);
+      setError(
+        err.response?.data?.detail ||
+        'Registrierung fehlgeschlagen. Bitte prüfe deine Eingaben.'
+      );
     }
   };
 
   return (
-    <div className="form-container">
-      <h1>Registrieren</h1>
-      {error && <div className="error-box">{error}</div>}
-      <form onSubmit={submitHandler}>
-        <label htmlFor="email">E-Mail</label>
-        <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-        />
-        <label htmlFor="password">Passwort</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" className="btn-primary">Registrieren</button>
-      </form>
-      <p>
-        Schon registriert? <Link to="/login">Einloggen</Link>
-      </p>
+    <div className="register-page">
+      <div className="register-card">
+        <h1 className="register-title">Neues Konto erstellen</h1>
+        {error && <div className="register-error">{error}</div>}
+
+        <form onSubmit={handleSubmit} className="register-form">
+          <label className="register-label">
+            Name
+            <input
+              type="text"
+              name="name"
+              className="register-input"
+              value={form.name}
+              onChange={handleChange}
+              required
+            />
+          </label>
+
+          <label className="register-label">
+            E-Mail
+            <input
+              type="email"
+              name="email"
+              className="register-input"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </label>
+
+          <label className="register-label">
+            Adresse
+            <input
+              type="text"
+              name="address"
+              className="register-input"
+              value={form.address}
+              onChange={handleChange}
+            />
+          </label>
+
+          <label className="register-label">
+            Passwort
+            <input
+              type="password"
+              name="password"
+              className="register-input"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </label>
+
+          <button type="submit" className="register-button">
+            Registrieren
+          </button>
+        </form>
+
+        <p className="register-footer">
+          Schon registriert?{' '}
+          <button
+            className="register-link"
+            onClick={() => navigate('/login')}
+          >
+            Einloggen
+          </button>
+        </p>
+      </div>
     </div>
   );
 }
