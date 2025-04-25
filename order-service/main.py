@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 import crud, schemas, models
 from database import SessionLocal, engine
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import HTTPException, Response
 from typing import List
 import httpx
 
@@ -57,12 +56,3 @@ async def create_order_endpoint(order: schemas.OrderCreate, db: Session = Depend
 @app.get("/orders/{customer_id}", response_model=List[schemas.Order])
 def read_orders(customer_id: int, db: Session = Depends(get_db)):
     return crud.get_orders_by_customer(db, customer_id)
-
-@app.delete("/orders/{order_id}", status_code=204)
-def delete_order_endpoint(order_id: int, db: Session = Depends(get_db)):
-    deleted = crud.delete_order(db, order_id)  
-    if not deleted:
-        # falls die Bestellung nicht existiert
-        raise HTTPException(status_code=404, detail="Order not found")
-    # 204 No Content zurückgeben
-    return Response(status_code=204)

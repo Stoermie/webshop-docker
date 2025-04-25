@@ -70,7 +70,7 @@ services:
 
   order-service:
     build: ./order-service
-    container_name: order_service
+    container_name: order-service
     working_dir: /app
     volumes:
       - ./order-service:/app
@@ -101,7 +101,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
       target: dev                # ← fährt den Dev‑Mode mit Hot‑Reload
     container_name: webshop_frontend
     working_dir: /app
