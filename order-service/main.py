@@ -1,20 +1,26 @@
-# order-service/main.py
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+import os
+import httpx
 import crud, schemas, models
 from database import SessionLocal, engine
-from fastapi.middleware.cors import CORSMiddleware
 from typing import List
-import httpx
 
-# Tabellen erzeugen
+EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "http://event_bus:4005")
+
+async def publish_event(event: dict):
+    try:
+        async with httpx.AsyncClient() as client:
+            await client.post(f"{EVENT_BUS_URL}/events", json=event)
+    except Exception as e:
+        print(f"⚠️ Fehler beim Senden an Event-Bus: {e}")
+
 models.Base.metadata.create_all(bind=engine)
-
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -28,31 +34,25 @@ def get_db():
 
 @app.post("/orders/", response_model=schemas.Order)
 async def create_order_endpoint(order: schemas.OrderCreate, db: Session = Depends(get_db)):
-    # Bestellung speichern
     db_order = crud.create_order(db, order)
-
-    # ORDER_CREATED-Event bauen
     event = {
-        "type": "ORDER_CREATED",
-        "data": {
-            "order_id": db_order.id,
-            "customer_id": db_order.customer_id,
-            "items": [
-                {"article_id": it.article_id, "quantity": it.quantity}
-                for it in order.items
-            ]
-        }
+        "type": "OrderCreated",
+        "data": {"order_id": db_order.id, "customer_id": db_order.customer_id}
     }
-
-    # Event an den Bus senden
-    async with httpx.AsyncClient() as client:
-        try:
-            await client.post("http://event-service:4005/events", json=event)
-        except Exception as e:
-            print(f"⚠️ Fehler beim Senden an Event-Service: {e}")
-
+    import asyncio
+    asyncio.create_task(publish_event(event))
     return db_order
 
 @app.get("/orders/{customer_id}", response_model=List[schemas.Order])
 def read_orders(customer_id: int, db: Session = Depends(get_db)):
     return crud.get_orders_by_customer(db, customer_id)
+
+@app.post("/events")
+async def handle_event(req: Request, db: Session = Depends(get_db)):
+    evt = await req.json()
+    t = evt.get("type")
+    d = evt.get("data", {})
+    if t == "CartItemAdded":
+        # example reaction
+        pass
+    return {"status": "ok"}

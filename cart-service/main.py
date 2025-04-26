@@ -1,19 +1,25 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import os
+import httpx
 
 from database import SessionLocal, engine, Base
 from models import Cart, CartItem
-from schemas import (
-    CartSchema,
-    CartCreateSchema,
-    CartItemCreateSchema,
-    CartItemSchema,
-)
+from schemas import CartSchema, CartCreateSchema, CartItemCreateSchema, CartItemSchema
 
+# Event-Bus URL
+EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "http://event_bus:4005")
+
+async def publish_event(event: dict):
+    try:
+        async with httpx.AsyncClient() as client:
+            await client.post(f"{EVENT_BUS_URL}/events", json=event)
+    except Exception as e:
+        print(f"⚠️ Fehler beim Senden an Event-Bus: {e}")
+
+# DB setup
 Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="Cart Service")
 app.add_middleware(
     CORSMiddleware,
@@ -36,6 +42,12 @@ def create_cart(cart_in: CartCreateSchema, db: Session = Depends(get_db)):
     db.add(db_cart)
     db.commit()
     db.refresh(db_cart)
+    # Publish event
+    import asyncio
+    asyncio.create_task(publish_event({
+        "type": "CartCreated",
+        "data": {"cart_id": db_cart.id}
+    }))
     return db_cart
 
 @app.get("/carts/{cart_id}", response_model=CartSchema)
@@ -50,55 +62,61 @@ def add_item(cart_id: int, item_in: CartItemCreateSchema, db: Session = Depends(
     cart = db.query(Cart).filter(Cart.id == cart_id).first()
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
-
-    existing = (
-        db.query(CartItem)
-        .filter(CartItem.cart_id == cart_id, CartItem.article_id == item_in.article_id)
-        .first()
-    )
+    existing = db.query(CartItem).filter(
+        CartItem.cart_id == cart_id,
+        CartItem.article_id == item_in.article_id
+    ).first()
     if existing:
         existing.quantity += item_in.quantity
         db.commit()
         db.refresh(existing)
-        return existing
-
-    new_item = CartItem(
-        cart_id=cart_id,
-        article_id=item_in.article_id,
-        quantity=item_in.quantity
-    )
-    db.add(new_item)
-    db.commit()
-    db.refresh(new_item)
+        new_item = existing
+    else:
+        new_item = CartItem(
+            cart_id=cart_id,
+            article_id=item_in.article_id,
+            quantity=item_in.quantity
+        )
+        db.add(new_item)
+        db.commit()
+        db.refresh(new_item)
+    # Publish item added event
+    import asyncio
+    asyncio.create_task(publish_event({
+        "type": "CartItemAdded",
+        "data": {
+            "cart_id": cart_id,
+            "article_id": new_item.article_id,
+            "quantity": new_item.quantity
+        }
+    }))
     return new_item
 
 @app.delete("/carts/{cart_id}/items/{item_id}", response_model=dict)
 def remove_item(cart_id: int, item_id: int, db: Session = Depends(get_db)):
-    cart_item = (
-        db.query(CartItem)
-        .filter(CartItem.cart_id == cart_id, CartItem.id == item_id)
-        .first()
-    )
-    if not cart_item:
+    ci = db.query(CartItem).filter(
+        CartItem.cart_id == cart_id,
+        CartItem.id == item_id
+    ).first()
+    if not ci:
         raise HTTPException(status_code=404, detail="Item not found")
-    db.delete(cart_item)
+    db.delete(ci)
     db.commit()
+    # Publish item removed event
+    import asyncio
+    asyncio.create_task(publish_event({
+        "type": "CartItemRemoved",
+        "data": {"cart_id": cart_id, "item_id": item_id}
+    }))
     return {"detail": "Item removed"}
 
-@app.put("/carts/{cart_id}/items/{item_id}", response_model=CartItemSchema)
-def update_item(cart_id: int, item_id: int, item_in: CartItemCreateSchema, db: Session = Depends(get_db)):
-    cart_item = (
-        db.query(CartItem)
-        .filter(CartItem.cart_id == cart_id, CartItem.id == item_id)
-        .first()
-    )
-    if not cart_item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    if item_in.quantity <= 0:
-        db.delete(cart_item)
+@app.post("/events")
+async def handle_event(req: Request, db: Session = Depends(get_db)):
+    evt = await req.json()
+    t = evt.get("type")
+    d = evt.get("data", {})
+    if t == "OrderCreated":
+        # clear cart when order placed
+        db.query(CartItem).filter(CartItem.cart_id == d.get("cart_id")).delete()
         db.commit()
-        raise HTTPException(status_code=200, detail="Item removed because quantity <= 0")
-    cart_item.quantity = item_in.quantity
-    db.commit()
-    db.refresh(cart_item)
-    return cart_item
+    return {"status": "ok"}
