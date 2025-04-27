@@ -1,14 +1,16 @@
-# Beispiel: catalog-service/Dockerfile
-FROM python:3.10-slim
-
+# Stage 1: Build
+FROM python:3.10-slim AS builder
 WORKDIR /app
-
-# 1) Abhängigkeiten installieren
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 2) Quellcode kopieren
+RUN pip install --upgrade pip setuptools \
+    && pip install --no-cache-dir -r requirements.txt
 COPY . .
 
-# 3) Dev‑Server mit Hot‑Reload
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+# Stage 2: Runtime
+FROM python:3.10-slim
+WORKDIR /app
+COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
+COPY --from=builder /app /app
+
+EXPOSE 8002
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]

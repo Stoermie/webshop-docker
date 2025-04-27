@@ -1,18 +1,16 @@
-FROM python:3.10-slim
-
+# Stage 1: Build
+FROM python:3.10-slim AS builder
 WORKDIR /app
-
-# 1) Requirements kopieren und installieren
-COPY requirements.txt ./
+COPY requirements.txt .
 RUN pip install --upgrade pip setuptools \
- && pip install --no-cache-dir -r requirements.txt \
- && pip install httpx
-
-# 2) Restlichen Code kopieren
+    && pip install --no-cache-dir -r requirements.txt
 COPY . .
 
-# 3) Port freigeben
-EXPOSE 8003
+# Stage 2: Runtime
+FROM python:3.10-slim
+WORKDIR /app
+COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
+COPY --from=builder /app /app
 
-# 4) Server starten
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003", "--reload"]
+EXPOSE 8002
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]

@@ -1,7 +1,6 @@
-// src/components/ProductDetails.js
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';  // Link hinzugefügt
 import { AuthContext } from '../contexts/AuthContext';
 import './ProductDetails.css';
 
@@ -26,7 +25,7 @@ export default function ProductDetails() {
     axios
       .get('http://192.168.178.122:8000/api/articles/')
       .then(res => {
-        const others = res.data.filter(b => b.id !== +bookId);
+        const others = res.data.filter(b => b.article_id !== +bookId);
         const picks = [];
         while (picks.length < 4 && others.length) {
           const idx = Math.floor(Math.random() * others.length);
@@ -86,11 +85,10 @@ export default function ProductDetails() {
           <h1 className="pd-title">{book.name}</h1>
           {book.author && <p className="pd-author">von {book.author}</p>}
           <p className="pd-price">{book.price.toFixed(2)} €</p>
-          <p className="pd-category">{book.category || '—'}</p>
+          <p className="pd-category">{book.book_category || '—'}</p>
           <p className="pd-isbn"><strong>ISBN:</strong> {book.isbn || '—'}</p>
           <p className="pd-delivery"><strong>Lieferzeit:</strong> 1–3 Arbeitstage</p>
 
-          {/* Haupt-Add-to-Cart-Button */}
           <button
             className="pd-add-btn"
             onClick={() => handleAddToCart(+bookId)}
@@ -108,12 +106,15 @@ export default function ProductDetails() {
         </div>
       </div>
 
-      {/* Empfehlungen-Section nutzt jetzt recs und handleAddToCart */}
       <div className="pd-recs">
         <h2>Vielleicht interessieren Sie sich auch für</h2>
         <div className="pd-recs-grid">
           {recs.map(r => (
-            <div key={r.id} className="pd-rec-card">
+            <Link
+              to={`/product/${r.article_id}`}       // auf die Kachel angewendet
+              key={r.article_id}
+              className="pd-rec-card"
+            >
               <img
                 src={r.image_url || '/placeholder-book.png'}
                 alt={r.name}
@@ -123,12 +124,12 @@ export default function ProductDetails() {
               <p className="pd-rec-price">{r.price.toFixed(2)} €</p>
               <button
                 className="pd-rec-add"
-                onClick={() => handleAddToCart(r.id)}
-                disabled={addingId === r.id}
+                onClick={() => handleAddToCart(r.article_id)}
+                disabled={addingId === r.article_id}
               >
-                {addingId === r.id ? '…' : '🛒'}
+                {addingId === r.article_id ? '…' : '🛒'}
               </button>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

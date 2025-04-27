@@ -15,3 +15,15 @@ class ArticleSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class ArticleCreateSchema(BaseModel):
+    # dieselben Felder wie beim ArticleSchema, nur ohne article_id
+    author: Optional[str] = None
+    name: str
+    price: float
+    manufactor: Optional[str] = None
+    book_category: Optional[str] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    isbn: Optional[str] = None

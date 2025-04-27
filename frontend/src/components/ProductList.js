@@ -1,4 +1,3 @@
-// src/components/ProductList.js
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -17,7 +16,7 @@ export default function ProductList() {
     axios
       .get('http://192.168.178.122:8000/api/articles/')
       .then(res => setBooks(res.data))
-      .catch(err => console.error('Fehler beim Laden der Bücher:', err));
+      .catch(err => console.error(err));
   }, []);
 
   // Filter nach Suchbegriff
@@ -37,7 +36,7 @@ export default function ProductList() {
   };
 
   // In den Warenkorb legen
-  const addToCart = async id => {
+  const addToCart = async (id) => {
     if (!isLoggedIn) {
       alert('Bitte einloggen, um Bücher in den Warenkorb zu legen.');
       return;
@@ -45,75 +44,54 @@ export default function ProductList() {
     setAddingId(id);
     try {
       const cartId = await getCartId();
-      await axios.post(
-        `http://192.168.178.122:8002/carts/${cartId}/items`,
-        { article_id: id, quantity: 1 }
-      );
+      await axios.post(`http://192.168.178.122:8002/carts/${cartId}/items`, {
+        article_id: id,
+        quantity: 1
+      });
       alert('Buch zum Warenkorb hinzugefügt!');
     } catch (err) {
-      console.error('Fehler beim Hinzufügen:', err);
-      alert('Konnte nicht zum Warenkorb hinzufügen.');
+      console.error(err);
+      alert('Fehler beim Hinzufügen zum Warenkorb.');
     } finally {
       setAddingId(null);
     }
   };
 
   return (
-    <div className="books-container">
-      <h1 className="books-title">
-        {searchTerm
-          ? `Suchergebnisse für „${searchTerm}“`
-          : 'Unsere Bücher'}
-      </h1>
-      {!searchTerm && (
-        <p className="books-subtitle">Tauche ein in die Welt der Geschichten!</p>
-      )}
-
-      {filteredBooks.length === 0 ? (
-        <p>Keine Bücher gefunden{searchTerm && ` für „${searchTerm}“`}.</p>
-      ) : (
-        <div className="books-grid">
-          {filteredBooks.map(book => (
-            <div className="book-card" key={book.article_id}>
-              <div className="book-image-wrap">
-                <img
-                  src={
-                    book.image_url ||
-                    'https://via.placeholder.com/180x240?text=Kein+Cover'
-                  }
-                  alt={book.name}
-                  className="book-image"
-                  loading="lazy"
-                  decoding="async" 
-                />
-              </div>
-              <div className="book-body">
-                <h2 className="book-title">{book.name}</h2>
-                {book.author && (
-                  <p className="book-author">von {book.author}</p>
-                )}
-                <p className="book-price">{book.price.toFixed(2)} €</p>
-                <div className="book-actions">
-                  <Link
-                    to={`/product/${book.article_id}`}
-                    className="book-detail-btn"
-                  >
-                    Details →
-                  </Link>
-                  <button
-                    className="book-add-btn"
-                    onClick={() => addToCart(book.article_id)}
-                    disabled={addingId === book.article_id}
-                    title="In den Warenkorb"
-                  >
-                    {addingId === book.article_id ? '…' : '🛒'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="books-grid">
+      {filteredBooks.map(book => (
+        <Link
+          to={`/product/${book.article_id}`}               // Backticks in {}
+          key={book.article_id}
+          className="book-card"
+        >
+          <div className="book-image-wrap">
+            <img
+              src={book.image_url || 'https://via.placeholder.com/180x240?text=Kein+Cover'}
+              alt={book.name}
+              className="book-image"
+              loading="lazy"
+            />
+          </div>
+          <div className="book-body">
+            <h2 className="book-title">{book.name}</h2>
+            {book.author && <p className="book-author">von {book.author}</p>}
+            <p className="book-price">{book.price.toFixed(2)} €</p>
+            <button
+              className="book-add-btn"
+              onClick={e => {
+                e.preventDefault();       // Verhindert das Springen auf Link
+                e.stopPropagation();
+                addToCart(book.article_id);
+              }}
+              disabled={addingId === book.article_id}
+              title="In den Warenkorb"
+            >
+              {addingId === book.article_id ? '…' : '🛒'}
+            </button>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }

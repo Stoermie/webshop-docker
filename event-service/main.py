@@ -15,10 +15,10 @@ app.add_middleware(
 
 # Liste der Service-Endpunkte, die wir benachrichtigen wollen
 SERVICE_ENDPOINTS = [
-    "http://catalog_service:8000/events",
-    "http://customer_service:8001/events",
-    "http://cart_service:8002/events",
-    "http://order_service:8003/events",
+    "http://catalog-service:8000/events",
+    "http://customer-service:8001/events",
+    "http://cart-service:8002/events",
+    "http://order-service:8003/events",
 ]
 
 @app.post("/events")

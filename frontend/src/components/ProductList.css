@@ -146,3 +146,10 @@
   opacity: 0.6;
   cursor: default;
 }
+
+.book-card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  cursor: pointer;
+}

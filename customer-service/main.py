@@ -1,11 +1,13 @@
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import os
 import httpx
+
 import crud, schemas, models
 from database import SessionLocal, engine
 
+# Event-Bus URL
 EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "http://event_bus:4005")
 
 async def publish_event(event: dict):
@@ -15,11 +17,15 @@ async def publish_event(event: dict):
     except Exception as e:
         print(f"⚠️ Fehler beim Senden an Event-Bus: {e}")
 
+# Datenbank-Tabellen erzeugen
 models.Base.metadata.create_all(bind=engine)
-app = FastAPI()
+
+# FastAPI-Instanz\app = FastAPI(title="Customer Service")
+app = FastAPI(title="Customer Service")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -32,26 +38,49 @@ def get_db():
         db.close()
 
 @app.post("/customers/", response_model=schemas.Customer)
-def create_customer(cust: schemas.CustomerCreate, db: Session = Depends(get_db)):
-    if crud.get_customer_by_email(db, cust.email):
-        raise HTTPException(status_code=400, detail="Email already registered")
-    user = crud.create_customer(db, cust)
-    import asyncio
-    asyncio.create_task(publish_event({
-        "type": "CustomerCreated",
-        "data": {"customer_id": user.id, "email": user.email}
-    }))
+def create_customer(
+    cust_in: schemas.CustomerCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    # Neuen Kunden anlegen
+    user = crud.create_customer(db, cust_in)
+
+    # Event verschicken
+    background_tasks.add_task(
+        publish_event,
+        {
+            "type": "CustomerCreated",
+            "data": {"customer_id": user.id, "email": user.email}
+        }
+    )
+    return user
+
+@app.get("/customers/{customer_id}", response_model=schemas.Customer)
+def read_customer(
+    customer_id: int,
+    db: Session = Depends(get_db)
+):
+    user = crud.get_customer_by_id(db, customer_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Customer not found")
     return user
 
 @app.post("/customers/login", response_model=schemas.Customer)
-def login_customer(credentials: schemas.CustomerLogin, db: Session = Depends(get_db)):
+def login_customer(
+    credentials: schemas.CustomerLogin,
+    db: Session = Depends(get_db),
+):
     user = crud.authenticate_customer(db, credentials.email, credentials.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
     return user
 
 @app.post("/events")
-async def handle_event(req: Request, db: Session = Depends(get_db)):
+async def handle_event(
+    req: Request,
+    db: Session = Depends(get_db)
+):
     evt = await req.json()
-    # handle incoming events if needed
+    # Hier können wir eingehende Events verarbeiten
     return {"status": "ok"}

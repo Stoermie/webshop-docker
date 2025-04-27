@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  cart-service:
+    env_file: .env
+
+  catalog-service:
+    env_file: .env
+
+  customer-service:
+    env_file: .env
+
+  order-service:
+    env_file: .env
+
+  event_bus:
+    env_file: .env

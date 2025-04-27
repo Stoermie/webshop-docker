@@ -25,7 +25,7 @@ services:
 
   catalog-service:
     build: ./catalog-service
-    container_name: catalog_service
+    container_name: catalog-service
     working_dir: /app
     volumes:
       - ./catalog-service:/app
@@ -41,7 +41,7 @@ services:
 
   cart-service:
     build: ./cart-service
-    container_name: cart_service
+    container_name: cart-service
     working_dir: /app
     volumes:
       - ./cart-service:/app
@@ -57,7 +57,7 @@ services:
 
   customer-service:
     build: ./customer-service
-    container_name: customer_service
+    container_name: customer-service
     working_dir: /app
     volumes:
       - ./customer-service:/app
@@ -75,11 +75,11 @@ services:
 
   order-service:
     build: ./order-service
-    container_name: order_service
+    container_name: order-service
     working_dir: /app
     volumes:
-      - ./order-service:/app
-    ports:
+      - ./order-service:/app 
+    ports:              # <— hier der Listentyp
       - "8003:8003"
     depends_on:
       postgresdb:
@@ -91,7 +91,7 @@ services:
 
   event_bus:
     build: ./event-service
-    container_name: event_bus
+    container_name: event-service
     working_dir: /app
     volumes:
       - ./event-service:/app
@@ -113,7 +113,7 @@ services:
     container_name: webshop_frontend
     working_dir: /app
     volumes:
-      - ./frontend:/appdocker compos
+      - ./frontend:/app
       - /app/node_modules
     ports:
       - "3001:3000"
