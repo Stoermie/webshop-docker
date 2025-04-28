@@ -1,18 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
+// src/components/ProductDetails.js
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams, Link } from 'react-router-dom';  // Link hinzugefügt
-import { AuthContext } from '../contexts/AuthContext';
+import { useParams, Link } from 'react-router-dom';
 import './ProductDetails.css';
 
 export default function ProductDetails() {
   const { id: bookId } = useParams();
-  const { isLoggedIn } = useContext(AuthContext);
-
   const [book, setBook] = useState(null);
   const [recs, setRecs] = useState([]);
   const [addingId, setAddingId] = useState(null);
 
-  // Buchdaten laden
   useEffect(() => {
     axios
       .get(`http://192.168.178.122:8000/api/articles/${bookId}`)
@@ -20,7 +17,6 @@ export default function ProductDetails() {
       .catch(console.error);
   }, [bookId]);
 
-  // Empfehlungen laden
   useEffect(() => {
     axios
       .get('http://192.168.178.122:8000/api/articles/')
@@ -36,7 +32,6 @@ export default function ProductDetails() {
       .catch(console.error);
   }, [bookId]);
 
-  // Cart-ID-Helper
   const getCartId = async () => {
     let cartId = localStorage.getItem('cartId');
     if (!cartId) {
@@ -47,12 +42,7 @@ export default function ProductDetails() {
     return cartId;
   };
 
-  // Einheitliche Add-to-Cart-Funktion
   const handleAddToCart = async (articleId) => {
-    if (!isLoggedIn) {
-      alert('Bitte einloggen, um Bücher in den Warenkorb zu legen.');
-      return;
-    }
     setAddingId(articleId);
     try {
       const cartId = await getCartId();
@@ -111,7 +101,7 @@ export default function ProductDetails() {
         <div className="pd-recs-grid">
           {recs.map(r => (
             <Link
-              to={`/product/${r.article_id}`}       // auf die Kachel angewendet
+              to={`/product/${r.article_id}`}
               key={r.article_id}
               className="pd-rec-card"
             >
@@ -124,7 +114,11 @@ export default function ProductDetails() {
               <p className="pd-rec-price">{r.price.toFixed(2)} €</p>
               <button
                 className="pd-rec-add"
-                onClick={() => handleAddToCart(r.article_id)}
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAddToCart(r.article_id);
+                }}
                 disabled={addingId === r.article_id}
               >
                 {addingId === r.article_id ? '…' : '🛒'}

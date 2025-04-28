@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+// src/components/ProductList.js
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useSearchParams } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext';
 import './ProductList.css';
 
 export default function ProductList() {
-  const { isLoggedIn } = useContext(AuthContext);
   const [books, setBooks] = useState([]);
   const [addingId, setAddingId] = useState(null);
   const [searchParams] = useSearchParams();
@@ -35,19 +34,15 @@ export default function ProductList() {
     return cartId;
   };
 
-  // In den Warenkorb legen
+  // In den Warenkorb legen (ohne Login-Prüfung)
   const addToCart = async (id) => {
-    if (!isLoggedIn) {
-      alert('Bitte einloggen, um Bücher in den Warenkorb zu legen.');
-      return;
-    }
     setAddingId(id);
     try {
       const cartId = await getCartId();
-      await axios.post(`http://192.168.178.122:8002/carts/${cartId}/items`, {
-        article_id: id,
-        quantity: 1
-      });
+      await axios.post(
+        `http://192.168.178.122:8002/carts/${cartId}/items`,
+        { article_id: id, quantity: 1 }
+      );
       alert('Buch zum Warenkorb hinzugefügt!');
     } catch (err) {
       console.error(err);
@@ -61,7 +56,7 @@ export default function ProductList() {
     <div className="books-grid">
       {filteredBooks.map(book => (
         <Link
-          to={`/product/${book.article_id}`}               // Backticks in {}
+          to={`/product/${book.article_id}`}
           key={book.article_id}
           className="book-card"
         >
@@ -80,7 +75,7 @@ export default function ProductList() {
             <button
               className="book-add-btn"
               onClick={e => {
-                e.preventDefault();       // Verhindert das Springen auf Link
+                e.preventDefault();
                 e.stopPropagation();
                 addToCart(book.article_id);
               }}

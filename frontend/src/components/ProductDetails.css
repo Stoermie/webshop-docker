@@ -144,9 +144,15 @@
   justify-content: center;
   transition: background 0.2s, transform 0.2s;
 }
-.pd-rec-add:hover {
-  background: #bf3f3f;
-  transform: scale(1.1);
+/* sorgt für sanfte Übergänge */
+.pd-rec-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* beim Hovern leicht heben und Schatten verstärken */
+.pd-rec-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 /* Responsive */
