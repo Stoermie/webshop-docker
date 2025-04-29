@@ -106,14 +106,12 @@ jobs:
       - name: Setup SSH key & known_hosts
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KEY_B64 }}" | base64 -d > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-          # Start ssh-agent and add the key
           eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_ed25519
+          ssh-add ~/.ssh/id_rsa
 
-          # Trust the Pi host so SSH won’t prompt
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy Helm chart on Pi
@@ -126,4 +124,3 @@ jobs:
               --set image.registry=${{ env.REGISTRY }} \
               --set image.tag=${{ env.IMAGE_TAG }}
           EOF
-
