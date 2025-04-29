@@ -95,7 +95,7 @@ jobs:
           tags: ${{ env.REGISTRY }}/frontend:${{ env.IMAGE_TAG }}
 
   deploy:
-    name: 🚀 Deploy to Kubernetes via Helm
+    name: 🚀 Deploy via SSH & Helm on Pi
     needs: build-and-push
     runs-on: ubuntu-latest
 
@@ -103,27 +103,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.8.1
         with:
-          version: 'latest'
+          ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Configure kubeconfig
+      - name: Deploy Helm chart on Pi
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-
-      - name: Install Helm (falls nicht vorhanden)
-        run: |
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-      - name: Deploy mit Helm
-        run: |
-          helm upgrade --install webshop \
-            ./helm/webshop \
-            --namespace webshop \
-            --create-namespace \
-            --set image.registry=${{ env.REGISTRY }} \
-            --set image.tag=${{ env.IMAGE_TAG }}
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/webshop
+            helm upgrade --install webshop ./helm/webshop \
+              --namespace webshop \
+              --create-namespace \
+              --set image.registry=${{ env.REGISTRY }} \
+              --set image.tag=${{ env.IMAGE_TAG }}
+          EOF
 
