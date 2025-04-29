@@ -49,41 +49,53 @@ export default function ProductList() {
   };
 
   return (
-    <div className="books-grid">
-      {filteredBooks.map(book => (
-        <Link
-          to={`/product/${book.article_id}`}
-          key={book.article_id}
-          className="book-card"
-        >
-          <div className="book-image-wrap">
-            <img
-              src={book.image_url || 'https://via.placeholder.com/180x240?text=Kein+Cover'}
-              alt={book.name}
-              className="book-image"
-              loading="lazy"
-            />
-          </div>
-          <div className="book-body">
-            <h2 className="book-title">{book.name}</h2>
-            {book.author && <p className="book-author">von {book.author}</p>}
-            <p className="book-price">{book.price.toFixed(2)} €</p>
-            <button
-              className="book-add-btn"
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                addToCart(book.article_id);
-              }}
-              disabled={addingId === book.article_id}
-              title="In den Warenkorb"
+    <div className="books-container">
+      <header className="books-header">
+        <h1 className="books-title">Unsere Bücher</h1>
+        <p className="books-intro">
+          Tauche ein in die Welt der Geschichten!!
+        </p>
+      </header>
+
+      {filteredBooks.length === 0 ? (
+        <p>Keine Bücher gefunden.</p>
+      ) : (
+        <div className="books-grid">
+          {filteredBooks.map(book => (
+            <Link
+              to={`/product/${book.article_id}`}
+              key={book.article_id}
+              className="book-card"
             >
-              {addingId === book.article_id ? '…' : '🛒'}
-            </button>
-          </div>
-        </Link>
-      ))}
+              <div className="book-image-wrap">
+                <img
+                  src={book.image_url || 'https://via.placeholder.com/180x240?text=Kein+Cover'}
+                  alt={book.name}
+                  className="book-image"
+                  loading="lazy"
+                />
+              </div>
+              <div className="book-body">
+                <h2 className="book-title">{book.name}</h2>
+                {book.author && <p className="book-author">von {book.author}</p>}
+                <p className="book-price">{book.price.toFixed(2)} €</p>
+                <button
+                  className="book-add-btn"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    addToCart(book.article_id);
+                  }}
+                  disabled={addingId === book.article_id}
+                  title="In den Warenkorb"
+                >
+                  {addingId === book.article_id ? '…' : '🛒'}
+                </button>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
-
