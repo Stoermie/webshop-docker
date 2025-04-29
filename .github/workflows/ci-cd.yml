@@ -1,9 +1,10 @@
-name: 🔄 CI/CD Pipeline: Build → Push → Deploy
+name: "🔄 CI/CD Pipeline: Build → Push → Deploy"
 
 # Trigger: bei jedem Push in den main-Branch
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 env:
   # Registry-URL für Docker Hub
@@ -125,3 +126,4 @@ jobs:
             --create-namespace \
             --set image.registry=${{ env.REGISTRY }} \
             --set image.tag=${{ env.IMAGE_TAG }}
+
