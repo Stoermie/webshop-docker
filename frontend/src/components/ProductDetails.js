@@ -1,4 +1,3 @@
-// src/components/ProductDetails.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
@@ -12,14 +11,14 @@ export default function ProductDetails() {
 
   useEffect(() => {
     axios
-      .get(`http://192.168.178.122:8000/api/articles/${bookId}`)
+      .get(`${process.env.REACT_APP_API_CATALOG}/api/articles/${bookId}`)
       .then(res => setBook(res.data))
       .catch(console.error);
   }, [bookId]);
 
   useEffect(() => {
     axios
-      .get('http://192.168.178.122:8000/api/articles/')
+      .get(`${process.env.REACT_APP_API_CATALOG}/api/articles/`)
       .then(res => {
         const others = res.data.filter(b => b.article_id !== +bookId);
         const picks = [];
@@ -35,7 +34,7 @@ export default function ProductDetails() {
   const getCartId = async () => {
     let cartId = localStorage.getItem('cartId');
     if (!cartId) {
-      const res = await axios.post('http://192.168.178.122:8002/carts/', {});
+      const res = await axios.post(`${process.env.REACT_APP_API_CART}/carts/`, {});
       cartId = res.data.id;
       localStorage.setItem('cartId', cartId);
     }
@@ -47,7 +46,7 @@ export default function ProductDetails() {
     try {
       const cartId = await getCartId();
       await axios.post(
-        `http://192.168.178.122:8002/carts/${cartId}/items`,
+        `${process.env.REACT_APP_API_CART}/carts/${cartId}/items`,
         { article_id: articleId, quantity: 1 }
       );
       alert('Buch zum Warenkorb hinzugefügt!');
@@ -130,3 +129,4 @@ export default function ProductDetails() {
     </div>
   );
 }
+

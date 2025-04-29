@@ -7,6 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --prefer-offline --no-audit --no-fund
 
+COPY .env ./
 COPY . ./
 RUN npm run build
 

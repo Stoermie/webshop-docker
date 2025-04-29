@@ -1,4 +1,3 @@
-// src/components/Login.js
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +15,7 @@ function Login() {
     e.preventDefault();
     try {
       const res = await axios.post(
-        'http://192.168.178.122:8001/customers/login',
+        `${process.env.REACT_APP_API_CUSTOMER}/customers/login`,
         { email, password }
       );
       login(res.data.id);

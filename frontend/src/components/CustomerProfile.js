@@ -1,4 +1,3 @@
-// src/components/CustomerProfile.js
 import React, { useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
@@ -20,25 +19,22 @@ export default function CustomerProfile() {
     }
     (async () => {
       try {
-        // Kundeninfos laden
         const custRes = await axios.get(
-          `http://192.168.178.122:8001/customers/${customerId}`
+          `${process.env.REACT_APP_API_CUSTOMER}/customers/${customerId}`
         );
         setCustomer(custRes.data);
 
-        // Alle Bestellungen laden
         const ordRes = await axios.get(
-          `http://192.168.178.122:8003/orders/${customerId}`
+          `${process.env.REACT_APP_API_ORDER}/orders/${customerId}`
         );
         const rawOrders = ordRes.data;
 
-        // Artikel-Details anreichern
         const enriched = await Promise.all(
           rawOrders.map(async order => {
             const items = await Promise.all(
               order.items.map(async it => {
                 const artRes = await axios.get(
-                  `http://192.168.178.122:8000/api/articles/${it.article_id}`
+                  `${process.env.REACT_APP_API_CATALOG}/api/articles/${it.article_id}`
                 );
                 return {
                   ...it,
@@ -55,13 +51,12 @@ export default function CustomerProfile() {
           })
         );
 
-        // Nur die beiden neuesten Bestellungen anzeigen
-        const latestTwo = enriched
-          .sort((a, b) => new Date(b.order_date) - new Date(a.order_date))
-          .slice(0, 2);
-        setOrders(latestTwo);
-      } catch (e) {
-        console.error(e);
+        setOrders(
+          enriched
+            .sort((a, b) => new Date(b.order_date) - new Date(a.order_date))
+            .slice(0, 2)
+        );
+      } catch {
         setError('Fehler beim Laden der Daten.');
       } finally {
         setLoading(false);
@@ -124,5 +119,4 @@ export default function CustomerProfile() {
         </div>
       )}
     </div>
-  );
-}
+)}

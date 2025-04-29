@@ -25,6 +25,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Health-Check
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 def get_db():
     db = SessionLocal()
     try:

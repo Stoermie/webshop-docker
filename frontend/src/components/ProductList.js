@@ -1,4 +1,3 @@
-// src/components/ProductList.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -13,34 +12,31 @@ export default function ProductList() {
   // Bücher laden
   useEffect(() => {
     axios
-      .get('http://192.168.178.122:8000/api/articles/')
+      .get(`${process.env.REACT_APP_API_CATALOG}/api/articles/`)
       .then(res => setBooks(res.data))
       .catch(err => console.error(err));
   }, []);
 
-  // Filter nach Suchbegriff
   const filteredBooks = books.filter(book =>
     book.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Helper: Cart anlegen/holen
   const getCartId = async () => {
     let cartId = localStorage.getItem('cartId');
     if (!cartId) {
-      const res = await axios.post('http://192.168.178.122:8002/carts/', {});
+      const res = await axios.post(`${process.env.REACT_APP_API_CART}/carts/`, {});
       cartId = res.data.id;
       localStorage.setItem('cartId', cartId);
     }
     return cartId;
   };
 
-  // In den Warenkorb legen (ohne Login-Prüfung)
   const addToCart = async (id) => {
     setAddingId(id);
     try {
       const cartId = await getCartId();
       await axios.post(
-        `http://192.168.178.122:8002/carts/${cartId}/items`,
+        `${process.env.REACT_APP_API_CART}/carts/${cartId}/items`,
         { article_id: id, quantity: 1 }
       );
       alert('Buch zum Warenkorb hinzugefügt!');
@@ -90,3 +86,4 @@ export default function ProductList() {
     </div>
   );
 }
+

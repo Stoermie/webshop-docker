@@ -22,7 +22,7 @@ function Register() {
     setError('');
     try {
       await axios.post(
-        'http://192.168.178.122:8001/customers/',
+        `${process.env.REACT_APP_API_CUSTOMER}/customers/`,
         {
           name: form.name,
           email: form.email,
@@ -30,7 +30,6 @@ function Register() {
           password: form.password
         }
       );
-      // Nach Registrierung zum Login weiterleiten
       navigate('/login');
     } catch (err) {
       console.error('Registrierung fehlgeschlagen:', err);

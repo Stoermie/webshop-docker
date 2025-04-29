@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-service
+  labels:
+    app: customer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customer
+  template:
+    metadata:
+      labels:
+        app: customer
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z postgres 5432; do
+            echo "warte auf postgres…";
+            sleep 2;
+          done
+
+      containers:
+      - name: customer
+        image: customer-service:arm64-latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001
+        env:
+        - name: EVENT_BUS_URL
+          value: http://event-bus:4005
+        - name: DATABASE_URL
+          value: postgresql://piData:senta@postgres:5432/customer_db
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"

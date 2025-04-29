@@ -1,4 +1,3 @@
-// src/components/Cart.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -6,14 +5,13 @@ import './Cart.css';
 
 export default function Cart() {
   const [cartId, setCartId] = useState(null);
-  const [rawItems, setRawItems] = useState([]);   // Roh-Items vom Cart-Service
-  const [items, setItems] = useState([]);         // Items inklusive Artikel-Details
+  const [rawItems, setRawItems] = useState([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const CART_API    = 'http://192.168.178.122:8002';
-  const ARTICLE_API = 'http://192.168.178.122:8000/api';
+  const CART_API    = process.env.REACT_APP_API_CART;
+  const ARTICLE_API = `${process.env.REACT_APP_API_CATALOG}/api`;
 
-  // 1) Cart-ID holen/erzeugen
   const getCartId = async () => {
     let id = localStorage.getItem('cartId');
     if (!id) {
@@ -25,7 +23,6 @@ export default function Cart() {
     return id;
   };
 
-  // 2) Roh-Items laden
   useEffect(() => {
     (async () => {
       try {
@@ -40,7 +37,6 @@ export default function Cart() {
     })();
   }, []);
 
-  // 3) Artikel-Details holen
   useEffect(() => {
     if (rawItems.length === 0) {
       setItems([]);
@@ -56,30 +52,22 @@ export default function Cart() {
     ).then(setItems);
   }, [rawItems]);
 
-  // Hilfsfunktion: Warenkorb neu laden
   const refreshCart = async () => {
     const res = await axios.get(`${CART_API}/carts/${cartId}`);
     setRawItems(res.data.items || []);
   };
 
-  // 4) Menge updaten über POST (delta hinzufügen/abziehen)
   const updateQty = async (itemId, delta) => {
     const item   = items.find(i => i.id === itemId);
     const newQty = item.quantity + delta;
-
-    // Wenn die neue Menge < 1, dann ganz entfernen
     if (newQty < 1) {
       await removeItem(itemId);
       return;
     }
-
     try {
       await axios.post(
         `${CART_API}/carts/${cartId}/items`,
-        {
-          article_id: item.article_id,
-          quantity:  delta
-        }
+        { article_id: item.article_id, quantity: delta }
       );
       await refreshCart();
     } catch (err) {
@@ -88,7 +76,6 @@ export default function Cart() {
     }
   };
 
-  // 5) Item entfernen
   const removeItem = async (itemId) => {
     try {
       await axios.delete(
@@ -109,7 +96,6 @@ export default function Cart() {
     );
   }
 
-  // Gesamtsumme berechnen
   const total = items.reduce(
     (sum, i) => sum + i.quantity * i.article.price,
     0
@@ -118,7 +104,6 @@ export default function Cart() {
   return (
     <div className="cart-container">
       <h1>Warenkorb</h1>
-
       {items.length === 0 ? (
         <p>Dein Warenkorb ist leer.</p>
       ) : (
@@ -151,7 +136,6 @@ export default function Cart() {
               </li>
             ))}
           </ul>
-
           <div className="cart-footer">
             <p className="cart-total">
               Zwischensumme: <strong>{total.toFixed(2)} €</strong>
@@ -165,3 +149,4 @@ export default function Cart() {
     </div>
   );
 }
+

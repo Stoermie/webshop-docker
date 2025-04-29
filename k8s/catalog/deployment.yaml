@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-service
+  labels:
+    app: catalog
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: catalog
+  template:
+    metadata:
+      labels:
+        app: catalog
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z postgres 5432; do
+            echo "warte auf postgres…";
+            sleep 2;
+          done
+
+      containers:
+      - name: catalog
+        image: catalog-service:arm64-latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        env:
+        - name: EVENT_BUS_URL
+          value: http://event-bus:4005
+        - name: DATABASE_URL
+          value: postgresql://piData:senta@postgres:5432/catalog_db
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"

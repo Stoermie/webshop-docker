@@ -13,6 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Liste der Service-Endpunkte, die wir benachrichtigen wollen
 SERVICE_ENDPOINTS = [
     "http://catalog-service:8000/events",
@@ -20,8 +21,10 @@ SERVICE_ENDPOINTS = [
     "http://cart-service:8002/events",
     "http://order-service:8003/events",
 ]
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
-@app.post("/events")
 async def receive_event(request: Request):
     """
     Empfängt ein Event und leitet es an alle Microservices weiter.

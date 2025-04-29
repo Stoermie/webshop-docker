@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-bus
+  labels:
+    app: event-bus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-bus
+  template:
+    metadata:
+      labels:
+        app: event-bus
+    spec:
+      containers:
+      - name: event-bus
+        image: event-service:arm64-latest       # <— hier: event-service, nicht event-bus
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 4005
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 4005
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4005
+          initialDelaySeconds: 15
+          periodSeconds: 20
