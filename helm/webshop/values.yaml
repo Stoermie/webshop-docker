@@ -1,0 +1,22 @@
+# Standard-Values für dein Chart
+
+image:
+  registry: docker.io/stoermi  # oder ghcr.io/Stoermie
+  tag: arm64-latest
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: webshop.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
