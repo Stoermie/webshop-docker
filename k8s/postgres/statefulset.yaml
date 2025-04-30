@@ -2,12 +2,13 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
+  namespace: webshop
 spec:
+  serviceName: postgres
+  replicas: 1
   selector:
     matchLabels:
       app: postgres
-  serviceName: postgres
-  replicas: 1
   template:
     metadata:
       labels:
@@ -16,13 +17,18 @@ spec:
       containers:
       - name: postgres
         image: postgres:13
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5432
         env:
-        - name: EVENT_BUS_URL
-          value: http://event-bus:4005
-        - name: DATABASE_URL
-          value: postgresql://piData:senta@postgres:5432/pidb
+        # ← DIESE drei Zeilen brauchst Du unbedingt:
+        - name: POSTGRES_USER
+          value: "piData"
+        - name: POSTGRES_PASSWORD
+          value: "senta"
+        - name: POSTGRES_DB
+          value: "pidb"
+        # entferne die EVENT_BUS_URL und DATABASE_URL hier!
         volumeMounts:
         - name: data
           mountPath: /var/lib/postgresql/data
