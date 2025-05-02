@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-eventbus
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-eventbus
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}-eventbus
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}-eventbus
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: eventbus
+          image: "{{ .Values.eventbus.image.repository }}:{{ .Values.eventbus.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.eventbus.port }}
+          # Event-Bus braucht keine DATABASE_URL, nur evtl. CORS-Host
+          env:
+            - name: PORT
+              value: "{{ .Values.eventbus.port }}"

@@ -1,0 +1,55 @@
+# templates/initdb-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-initdb
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: initdb
+        image: "{{ .Values.postgresql.image.registry }}/{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+        env:
+        - name: PGHOST
+          value: "{{ .Release.Name }}-postgresql"
+        - name: PGPORT
+          value: "{{ .Values.postgresql.primary.port }}"
+        - name: PGPASSWORD
+          value: "{{ .Values.postgresql.auth.password }}"
+        command:
+        - sh
+        - -c
+        - |
+          set -e
+
+          # auf Postgres warten
+          until pg_isready -h "$PGHOST" -p "$PGPORT"; do
+            echo "waiting for postgres…"
+            sleep 2
+          done
+
+          # erst prüfen, dann anlegen
+          psql -U {{ .Values.postgresql.auth.username }} -d postgres <<-EOSQL
+          DO
+          $$
+          BEGIN
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'cart_db') THEN
+              CREATE DATABASE cart_db OWNER {{ .Values.postgresql.auth.username }};
+            END IF;
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'catalog_db') THEN
+              CREATE DATABASE catalog_db OWNER {{ .Values.postgresql.auth.username }};
+            END IF;
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'customer_db') THEN
+              CREATE DATABASE customer_db OWNER {{ .Values.postgresql.auth.username }};
+            END IF;
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'order_db') THEN
+              CREATE DATABASE order_db OWNER {{ .Values.postgresql.auth.username }};
+            END IF;
+          END
+          $$;
+          EOSQL

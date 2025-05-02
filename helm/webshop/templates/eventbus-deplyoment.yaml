@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-eventbus
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-eventbus
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: {{ .Release.Name }}-eventbus
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.eventbus.port }}
+      targetPort: {{ .Values.eventbus.port }}
+      protocol: TCP

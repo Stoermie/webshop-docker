@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-catalog
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.catalog.port }}
+      targetPort: {{ .Values.catalog.port }}
+  selector:
+    app: {{ .Release.Name }}-catalog

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-order
+  labels:
+    app.kubernetes.io/name:      {{ .Release.Name }}-order
+    app.kubernetes.io/instance:  {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name:     {{ .Release.Name }}-order
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name:     {{ .Release.Name }}-order
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: order
+          image: "{{ .Values.order.image.repository }}:{{ .Values.order.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.order.port }}
+          env:
+            - name: DATABASE_URL
+              value: >-
+                postgresql://{{ .Values.postgresql.auth.username }}
+                  :{{ .Values.postgresql.auth.password }}
+                  @{{ .Values.postgresql.serviceName }}
+                  :{{ .Values.postgresql.port }}
+                  /{{ .Values.order.database }}
+            - name: CART_SERVICE_URL
+              value: "http://{{ .Release.Name }}-cart:{{ .Values.cart.port }}"
+            - name: CUSTOMER_SERVICE_URL
+              value: "http://{{ .Release.Name }}-customer:{{ .Values.customer.port }}"
+            - name: EVENT_BUS_URL
+              value: "http://{{ .Release.Name }}-eventbus:{{ .Values.eventbus.port }}"

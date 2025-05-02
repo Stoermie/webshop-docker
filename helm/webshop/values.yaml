@@ -1,13 +1,128 @@
-replicaCount: 1
+# values.yaml
 
-image:
-  repository: docker.io/stoermi/frontend
-  tag: arm64-latest
+# Anzahl der Replikas für alle Deployments
+replicaCount: 2
 
-service:
-  type: NodePort
+# Catalog-Service
+catalog:
+  image:
+    repository: docker.io/stoermi/catalog-service
+    tag: arm64-latest
+  port: 8001
+  database: catalog_db
+
+# Cart-Service
+cart:
+  image:
+    repository: docker.io/stoermi/cart-service
+    tag: arm64-latest
+  port: 8002
+  database: cart_db
+
+# Customer-Service
+customer:
+  image:
+    repository: docker.io/stoermi/customer-service
+    tag: arm64-latest
+  port: 8003
+  database: customer_db
+
+# Order-Service
+order:
+  image:
+    repository: docker.io/stoermi/order-service
+    tag: arm64-latest
+  port: 8004
+  database: order_db
+
+# Event-Bus
+eventbus:
+  image:
+    repository: docker.io/stoermi/event-service
+    tag: arm64-latest
+  port: 4005
+  nodePort: 30014
+
+# Frontend
+frontend:
+  image:
+    repository: docker.io/stoermi/frontend
+    tag: arm64-latest
   port: 80
-  nodePort: 30002
+  api:
+    catalog: /api/catalog
+    cart:    /api/cart
+    customer: /api/customer
+    order:   /api/order
+    events:  /api/events
 
+postgresql:
+  image:
+    registry: docker.io
+    repository: postgres
+    tag: 15-alpine
+
+  auth:
+    postgresPassword: senta   # Superuser “postgres”
+    username: pidata          # Custom-User
+    password: senta           # dessen Passwort
+    database: postgres        # Default-DB in der psql-Shell
+
+  primary:
+    initdb:
+      scripts:
+        init-dbs.sh: |-
+          #!/bin/bash
+          psql --username "$POSTGRESQL_USERNAME" <<-EOSQL
+            CREATE DATABASE IF NOT EXISTS catalog_db  OWNER pidata;
+            CREATE DATABASE IF NOT EXISTS customer_db OWNER pidata;
+            CREATE DATABASE IF NOT EXISTS order_db    OWNER pidata;
+            CREATE DATABASE IF NOT EXISTS cart_db     OWNER pidata;
+          EOSQL
+
+    service:
+      type: NodePort
+      ports:
+        postgresql: 5432
+      nodePorts:
+        postgresql: 30016
+
+    serviceName: webshop-postgresql
+    port:        5432
+
+
+# Service-Exposure für Deinen Ingress-Controller
+ingressService:
+  nodePort: 30080
+
+extraDeploy:
+  - templates/initdb-job.yaml
+
+# Ingress-Routing
 ingress:
-  enabled: false
+  enabled: true
+  paths:
+    - name: frontend
+      path: /
+      service: frontend
+      port: 80
+    - name: catalog
+      path: /api/catalog
+      service: catalog
+      port: 8001
+    - name: cart
+      path: /api/cart
+      service: cart
+      port: 8002
+    - name: customer
+      path: /api/customer
+      service: customer
+      port: 8003
+    - name: order
+      path: /api/order
+      service: order
+      port: 8004
+    - name: events
+      path: /api/events
+      service: eventbus
+      port: 4005
