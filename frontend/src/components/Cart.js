@@ -1,5 +1,6 @@
+// src/components/Cart.js
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../axios'; // Deine konfigurierte Axios-Instanz
 import { Link } from 'react-router-dom';
 import './Cart.css';
 
@@ -9,13 +10,14 @@ export default function Cart() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const CART_API    = process.env.REACT_APP_API_CART;
+  const CART_API = process.env.REACT_APP_API_CART; // z.B. "http://192.168.178.122:30011/api/carts"
   const ARTICLE_API = `${process.env.REACT_APP_API_CATALOG}/api`;
 
+  // Liefert bestehende Cart-ID oder erzeugt eine neue
   const getCartId = async () => {
     let id = localStorage.getItem('cartId');
     if (!id) {
-      const res = await axios.post(`${CART_API}/carts/`, {});
+      const res = await axios.post(`${CART_API}`, {});
       id = res.data.id;
       localStorage.setItem('cartId', id);
     }
@@ -23,11 +25,12 @@ export default function Cart() {
     return id;
   };
 
+  // Beim Mount Warenkorb laden
   useEffect(() => {
     (async () => {
       try {
-        const id  = await getCartId();
-        const res = await axios.get(`${CART_API}/carts/${id}`);
+        const id = await getCartId();
+        const res = await axios.get(`${CART_API}/${id}`);
         setRawItems(res.data.items || []);
       } catch {
         setRawItems([]);
@@ -37,6 +40,7 @@ export default function Cart() {
     })();
   }, []);
 
+  // Ergänzt Items um Artikeldaten
   useEffect(() => {
     if (rawItems.length === 0) {
       setItems([]);
@@ -53,12 +57,12 @@ export default function Cart() {
   }, [rawItems]);
 
   const refreshCart = async () => {
-    const res = await axios.get(`${CART_API}/carts/${cartId}`);
+    const res = await axios.get(`${CART_API}/${cartId}`);
     setRawItems(res.data.items || []);
   };
 
   const updateQty = async (itemId, delta) => {
-    const item   = items.find(i => i.id === itemId);
+    const item = items.find(i => i.id === itemId);
     const newQty = item.quantity + delta;
     if (newQty < 1) {
       await removeItem(itemId);
@@ -66,7 +70,7 @@ export default function Cart() {
     }
     try {
       await axios.post(
-        `${CART_API}/carts/${cartId}/items`,
+        `${CART_API}/${cartId}/items`,
         { article_id: item.article_id, quantity: delta }
       );
       await refreshCart();
@@ -79,7 +83,7 @@ export default function Cart() {
   const removeItem = async (itemId) => {
     try {
       await axios.delete(
-        `${CART_API}/carts/${cartId}/items/${itemId}`
+        `${CART_API}/${cartId}/items/${itemId}`
       );
       await refreshCart();
     } catch (err) {
@@ -97,7 +101,7 @@ export default function Cart() {
   }
 
   const total = items.reduce(
-    (sum, i) => sum + i.quantity * i.article.price,
+    (sum, i) => sum + i.quantity * (i.article?.price || 0),
     0
   );
 
@@ -112,14 +116,14 @@ export default function Cart() {
             {items.map(item => (
               <li key={item.id} className="cart-item">
                 <img
-                  src={item.article.image_url || '/placeholder-book.png'}
-                  alt={item.article.name}
+                  src={item.article?.image_url || '/placeholder-book.png'}
+                  alt={item.article?.name}
                   className="item-image"
                 />
                 <div className="item-info">
-                  <p className="item-name">{item.article.name}</p>
+                  <p className="item-name">{item.article?.name}</p>
                   <p className="item-price">
-                    {(item.article.price * item.quantity).toFixed(2)} €
+                    {(item.quantity * (item.article?.price || 0)).toFixed(2)} €
                   </p>
                 </div>
                 <div className="item-qty">
@@ -149,4 +153,3 @@ export default function Cart() {
     </div>
   );
 }
-

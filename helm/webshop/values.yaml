@@ -7,12 +7,12 @@ catalog:
   image:
     repository: docker.io/stoermi/catalog-service
     tag: arm64-latest
-  port: 8001
+  port: 8000
   database: catalog_db
   service:
     type: NodePort
-    port: 8001
-    nodePort: 30081
+    port: 8000
+    nodePort: 30010
 
 # Cart-Service
 cart:
@@ -24,31 +24,31 @@ cart:
   service:
     type: NodePort
     port: 8002
-    nodePort: 30082
+    nodePort: 30011
 
 # Customer-Service
 customer:
   image:
     repository: docker.io/stoermi/customer-service
     tag: arm64-latest
-  port: 8003
+  port: 8001
   database: customer_db
   service:
     type: NodePort
-    port: 8003
-    nodePort: 30083
+    port: 8001
+    nodePort: 30012
 
 # Order-Service
 order:
   image:
     repository: docker.io/stoermi/order-service
     tag: arm64-latest
-  port: 8004
+  port: 8003
   database: order_db
   service:
     type: NodePort
-    port: 8004
-    nodePort: 30084
+    port: 8003
+    nodePort: 30013
 
 # Event-Bus
 eventbus:
@@ -59,7 +59,7 @@ eventbus:
   service:
     type: NodePort
     port: 4005
-    nodePort: 30085
+    nodePort: 30014
 
 # Frontend
 frontend:
@@ -70,17 +70,16 @@ frontend:
   service:
     type: NodePort
     port: 80
-    nodePort: 30080
+    nodePort: 30003
 
   # Absolute Endpunkte auf die NodePorts
   api:
-    catalog:  "http://192.168.178.122:30081/api/articles"
-    cart:     "http://192.168.178.122:30082/api/carts"
-    customer: "http://192.168.178.122:30083/api/customers"
-    order:    "http://192.168.178.122:30084/api/orders"
-    events:   "http://192.168.178.122:30085/events"
+    catalog:  "http://192.168.178.122:30010/api/articles"
+    cart:     "http://192.168.178.122:30011/carts"
+    customer: "http://192.168.178.122:30012/customers"
+    order:    "http://192.168.178.122:30013/orders"
+    events:   "http://192.168.178.122:30014/events"
 
-# PostgreSQL
 postgresql:
   image:
     registry: docker.io
@@ -94,16 +93,6 @@ postgresql:
     database: postgres
 
   primary:
-    initdb:
-      scripts:
-        init-dbs.sh: |-
-          #!/bin/bash
-          psql --username "$POSTGRESQL_USERNAME" <<-EOSQL
-            CREATE DATABASE IF NOT EXISTS catalog_db  OWNER pidata;
-            CREATE DATABASE IF NOT EXISTS customer_db OWNER pidata;
-            CREATE DATABASE IF NOT EXISTS order_db    OWNER pidata;
-            CREATE DATABASE IF NOT EXISTS cart_db     OWNER pidata;
-          EOSQL
     service:
       type: NodePort
       ports:
@@ -111,11 +100,4 @@ postgresql:
       nodePorts:
         postgresql: 30016
     serviceName: webshop-postgresql
-    port:        5432
-
-# Kein Ingress mehr, wir exposen alles über NodePort
-ingress:
-  enabled: false
-
-extraDeploy:
-  - templates/initdb-job.yaml
+    port: 5432
