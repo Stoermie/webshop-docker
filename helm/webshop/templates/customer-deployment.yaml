@@ -1,34 +1,39 @@
+# templates/customer-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-customer
   labels:
-    app.kubernetes.io/name:      {{ .Release.Name }}-customer
-    app.kubernetes.io/instance:  {{ .Release.Name }}
+    app.kubernetes.io/name: {{ .Release.Name }}-customer
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name:     {{ .Release.Name }}-customer
+      app.kubernetes.io/name: {{ .Release.Name }}-customer
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name:     {{ .Release.Name }}-customer
+        app.kubernetes.io/name: {{ .Release.Name }}-customer
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
         - name: customer
           image: "{{ .Values.customer.image.repository }}:{{ .Values.customer.image.tag }}"
+          command:
+            - python
+            - -m
+            - uvicorn
+            - main:app
+            - --host
+            - "0.0.0.0"
+            - --port
+            - "{{ .Values.customer.port }}"
           ports:
             - containerPort: {{ .Values.customer.port }}
           env:
             - name: DATABASE_URL
-              value: >-
-                postgresql://{{ .Values.postgresql.auth.username }}
-                  :{{ .Values.postgresql.auth.password }}
-                  @{{ .Values.postgresql.serviceName }}
-                  :{{ .Values.postgresql.port }}
-                  /{{ .Values.customer.database }}
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Release.Name }}-postgresql:{{ .Values.postgresql.primary.service.ports.postgresql }}/{{ .Values.customer.database }}"
             - name: EVENT_BUS_URL
               value: "http://{{ .Release.Name }}-eventbus:{{ .Values.eventbus.port }}"

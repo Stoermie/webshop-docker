@@ -6,12 +6,11 @@ metadata:
     app.kubernetes.io/name: {{ .Release.Name }}-eventbus
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  type: ClusterIP
+  type: {{ .Values.eventbus.service.type }}
+  ports:
+    - port: {{ .Values.eventbus.service.port }}
+      targetPort: {{ .Values.eventbus.port }}
+      nodePort: {{ .Values.eventbus.service.nodePort }}
   selector:
     app.kubernetes.io/name: {{ .Release.Name }}-eventbus
     app.kubernetes.io/instance: {{ .Release.Name }}
-  ports:
-    - name: http
-      port: {{ .Values.eventbus.port }}
-      targetPort: {{ .Values.eventbus.port }}
-      protocol: TCP

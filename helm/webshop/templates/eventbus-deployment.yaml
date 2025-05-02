@@ -1,3 +1,4 @@
+# templates/eventbus-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,9 +21,17 @@ spec:
       containers:
         - name: eventbus
           image: "{{ .Values.eventbus.image.repository }}:{{ .Values.eventbus.image.tag }}"
+          command:
+            - python
+            - -m
+            - uvicorn
+            - main:app
+            - --host
+            - "0.0.0.0"
+            - --port
+            - "{{ .Values.eventbus.port }}"
           ports:
             - containerPort: {{ .Values.eventbus.port }}
-          # Event-Bus braucht keine DATABASE_URL, nur evtl. CORS-Host
           env:
             - name: PORT
               value: "{{ .Values.eventbus.port }}"

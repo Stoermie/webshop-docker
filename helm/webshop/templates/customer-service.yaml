@@ -2,10 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-customer
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-customer
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  type: ClusterIP
+  type: {{ .Values.customer.service.type }}
   ports:
-    - port: {{ .Values.customer.port }}
+    - port: {{ .Values.customer.service.port }}
       targetPort: {{ .Values.customer.port }}
+      nodePort: {{ .Values.customer.service.nodePort }}
   selector:
-    app: {{ .Release.Name }}-customer
+    app.kubernetes.io/name: {{ .Release.Name }}-customer
+    app.kubernetes.io/instance: {{ .Release.Name }}

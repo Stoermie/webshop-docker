@@ -1,0 +1,715 @@
+---
+# Source: webshop/charts/postgresql/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: webshop-postgresql
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-12.1.9
+    app.kubernetes.io/instance: webshop
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  postgres-password: "c2VudGE="
+  password: "c2VudGE="
+  # We don't auto-generate LDAP password when it's not provided as we do for other passwords
+---
+# Source: webshop/charts/postgresql/templates/primary/initialization-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webshop-postgresql-init-scripts
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-12.1.9
+    app.kubernetes.io/instance: webshop
+    app.kubernetes.io/managed-by: Helm
+data:
+  init-dbs.sh: |-
+    #!/bin/bash
+    psql --username "$POSTGRESQL_USERNAME" <<-EOSQL
+      CREATE DATABASE IF NOT EXISTS catalog_db  OWNER pidata;
+      CREATE DATABASE IF NOT EXISTS customer_db OWNER pidata;
+      CREATE DATABASE IF NOT EXISTS order_db    OWNER pidata;
+      CREATE DATABASE IF NOT EXISTS cart_db     OWNER pidata;
+    EOSQL
+---
+# Source: webshop/charts/postgresql/templates/primary/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-postgresql-hl
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-12.1.9
+    app.kubernetes.io/instance: webshop
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: primary
+    # Use this annotation in addition to the actual publishNotReadyAddresses
+    # field below because the annotation will stop being respected soon but the
+    # field is broken in some versions of Kubernetes:
+    # https://github.com/kubernetes/kubernetes/issues/58662
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  # We want all pods in the StatefulSet to have their addresses published for
+  # the sake of the other Postgresql pods even before they're ready, since they
+  # have to be able to talk to each other in order to become ready.
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: webshop
+    app.kubernetes.io/component: primary
+---
+# Source: webshop/charts/postgresql/templates/primary/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-postgresql
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-12.1.9
+    app.kubernetes.io/instance: webshop
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: primary
+  annotations:
+spec:
+  type: NodePort
+  externalTrafficPolicy: "Cluster"
+  sessionAffinity: None
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+      nodePort: 30016
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: webshop
+    app.kubernetes.io/component: primary
+---
+# Source: webshop/templates/cart-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-cart
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8002
+      targetPort: 8002
+  selector:
+    app: webshop-cart
+---
+# Source: webshop/templates/catalog-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-catalog
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8001
+      targetPort: 8001
+  selector:
+    app: webshop-catalog
+---
+# Source: webshop/templates/customer-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-customer
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8003
+      targetPort: 8003
+  selector:
+    app: webshop-customer
+---
+# Source: webshop/templates/eventbus-deplyoment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-eventbus
+  labels:
+    app.kubernetes.io/name: webshop-eventbus
+    app.kubernetes.io/instance: webshop
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: webshop-eventbus
+    app.kubernetes.io/instance: webshop
+  ports:
+    - name: http
+      port: 4005
+      targetPort: 4005
+      protocol: TCP
+---
+# Source: webshop/templates/frontend-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-frontend
+  labels:
+    app.kubernetes.io/name: webshop-frontend
+    app.kubernetes.io/instance: webshop
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: webshop-frontend
+    app.kubernetes.io/instance: webshop
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+---
+# Source: webshop/templates/ingress-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-ingress
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/instance: webshop
+  ports:
+    - name: web
+      port: 80
+      targetPort: 80
+      nodePort: 30080
+---
+# Source: webshop/templates/order-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-order
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8004
+      targetPort: 8004
+  selector:
+    app: webshop-order
+---
+# Source: webshop/templates/cart-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webshop-cart
+  labels:
+    app.kubernetes.io/name: webshop-cart
+    app.kubernetes.io/instance: webshop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: webshop-cart
+      app.kubernetes.io/instance: webshop
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: webshop-cart
+        app.kubernetes.io/instance: webshop
+    spec:
+      initContainers:
+        - name: wait-for-postgresql
+          image: busybox:1.35.0
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z webshop-postgresql 5432; do
+                echo "waiting for postgresql at webshop-postgresql:5432"
+                sleep 2
+              done
+      containers:
+        - name: cart
+          image: "docker.io/stoermi/cart-service:arm64-latest"
+          ports:
+            - containerPort: 8002
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://pidata:senta@webshop-postgresql:5432/cart_db"
+            - name: EVENT_BUS_URL
+              value: http://webshop-eventbus:4005
+---
+# Source: webshop/templates/catalog-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webshop-catalog
+  labels:
+    app.kubernetes.io/name: webshop-catalog
+    app.kubernetes.io/instance: webshop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: webshop-catalog
+      app.kubernetes.io/instance: webshop
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: webshop-catalog
+        app.kubernetes.io/instance: webshop
+    spec:
+      initContainers:
+        - name: wait-for-postgresql
+          image: busybox:1.35.0
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z webshop-postgresql 5432; do
+                echo "waiting for postgresql at webshop-postgresql:5432"
+                sleep 2
+              done
+      containers:
+        - name: catalog
+          image: "docker.io/stoermi/catalog-service:arm64-latest"
+          ports:
+            - containerPort: 8001
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://pidata:senta@webshop-postgresql:5432/catalog_db"
+            - name: EVENT_BUS_URL
+              value: http://webshop-eventbus:4005
+---
+# Source: webshop/templates/customer-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webshop-customer
+  labels:
+    app.kubernetes.io/name:      webshop-customer
+    app.kubernetes.io/instance:  webshop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name:     webshop-customer
+      app.kubernetes.io/instance: webshop
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name:     webshop-customer
+        app.kubernetes.io/instance: webshop
+    spec:
+      containers:
+        - name: customer
+          image: "docker.io/stoermi/customer-service:arm64-latest"
+          ports:
+            - containerPort: 8003
+          env:
+            - name: DATABASE_URL
+              value: >-
+                postgresql://pidata:senta
+                @:/customer_db
+            - name: EVENT_BUS_URL
+              value: "http://webshop-eventbus:4005"
+---
+# Source: webshop/templates/eventbus-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webshop-eventbus
+  labels:
+    app.kubernetes.io/name: webshop-eventbus
+    app.kubernetes.io/instance: webshop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: webshop-eventbus
+      app.kubernetes.io/instance: webshop
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: webshop-eventbus
+        app.kubernetes.io/instance: webshop
+    spec:
+      containers:
+        - name: eventbus
+          image: "docker.io/stoermi/event-service:arm64-latest"
+          ports:
+            - containerPort: 4005
+          # Event-Bus braucht keine DATABASE_URL, nur evtl. CORS-Host
+          env:
+            - name: PORT
+              value: "4005"
+---
+# Source: webshop/templates/frontend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webshop-frontend
+  labels:
+    app.kubernetes.io/name: webshop-frontend
+    app.kubernetes.io/instance: webshop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: webshop-frontend
+      app.kubernetes.io/instance: webshop
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: webshop-frontend
+        app.kubernetes.io/instance: webshop
+    spec:
+      containers:
+        - name: frontend
+          image: "docker.io/stoermi/frontend:arm64-latest"
+          ports:
+            - containerPort: 80
+          env:
+            - name: REACT_APP_API_CATALOG
+              value: /api/catalog
+            - name: REACT_APP_API_CART
+              value: /api/cart
+            - name: REACT_APP_API_CUSTOMER
+              value: /api/customer
+            - name: REACT_APP_API_ORDER
+              value: /api/order
+            - name: REACT_APP_API_EVENTS
+              value: /api/events
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+# Source: webshop/templates/order-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webshop-order
+  labels:
+    app.kubernetes.io/name:      webshop-order
+    app.kubernetes.io/instance:  webshop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name:     webshop-order
+      app.kubernetes.io/instance: webshop
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name:     webshop-order
+        app.kubernetes.io/instance: webshop
+    spec:
+      containers:
+        - name: order
+          image: "docker.io/stoermi/order-service:arm64-latest"
+          ports:
+            - containerPort: 8004
+          env:
+            - name: DATABASE_URL
+              value: >-
+                postgresql://pidata:senta
+                @:/order_db
+            - name: CART_SERVICE_URL
+              value: "http://webshop-cart:8002"
+            - name: CUSTOMER_SERVICE_URL
+              value: "http://webshop-customer:8003"
+            - name: EVENT_BUS_URL
+              value: "http://webshop-eventbus:4005"
+---
+# Source: webshop/charts/postgresql/templates/primary/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: webshop-postgresql
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-12.1.9
+    app.kubernetes.io/instance: webshop
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: primary
+  annotations:
+spec:
+  replicas: 1
+  serviceName: webshop-postgresql-hl
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/instance: webshop
+      app.kubernetes.io/component: primary
+  template:
+    metadata:
+      name: webshop-postgresql
+      labels:
+        app.kubernetes.io/name: postgresql
+        helm.sh/chart: postgresql-12.1.9
+        app.kubernetes.io/instance: webshop
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: primary
+      annotations:
+    spec:
+      serviceAccountName: default
+      
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: postgresql
+                    app.kubernetes.io/instance: webshop
+                    app.kubernetes.io/component: primary
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      securityContext:
+        fsGroup: 1001
+      hostNetwork: false
+      hostIPC: false
+      initContainers:
+      containers:
+        - name: postgresql
+          image: docker.io/postgres:15-alpine
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsUser: 1001
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: "/bitnami/postgresql"
+            - name: PGDATA
+              value: "/bitnami/postgresql/data"
+            # Authentication
+            - name: POSTGRES_USER
+              value: "pidata"
+            - name: POSTGRES_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: webshop-postgresql
+                  key: postgres-password
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: webshop-postgresql
+                  key: password
+            - name: POSTGRES_DB
+              value: "postgres"
+            # Replication
+            # Initdb
+            # Standby
+            # LDAP
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
+            # TLS
+            - name: POSTGRESQL_ENABLE_TLS
+              value: "no"
+            # Audit
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "false"
+            - name: POSTGRESQL_LOG_CONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_LOG_DISCONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+              value: "off"
+            # Others
+            - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+              value: "error"
+            - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+              value: "pgaudit"
+          ports:
+            - name: tcp-postgresql
+              containerPort: 5432
+          livenessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "pidata" -d "dbname=postgres" -h 127.0.0.1 -p 5432
+          readinessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - -e
+                
+                - |
+                  exec pg_isready -U "pidata" -d "dbname=postgres" -h 127.0.0.1 -p 5432
+          resources:
+            limits: {}
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: custom-init-scripts
+              mountPath: /docker-entrypoint-initdb.d/
+            - name: dshm
+              mountPath: /dev/shm
+            - name: data
+              mountPath: /bitnami/postgresql
+      volumes:
+        - name: custom-init-scripts
+          configMap:
+            name: webshop-postgresql-init-scripts
+        - name: dshm
+          emptyDir:
+            medium: Memory
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
+---
+# Source: webshop/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webshop-ingress-rules
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+    -          # kein host → catch-all
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webshop-frontend
+                port:
+                  number: 80
+          - path: /api/catalog
+            pathType: Prefix
+            backend:
+              service:
+                name: webshop-catalog
+                port:
+                  number: 8001
+          - path: /api/cart
+            pathType: Prefix
+            backend:
+              service:
+                name: webshop-cart
+                port:
+                  number: 8002
+          - path: /api/customer
+            pathType: Prefix
+            backend:
+              service:
+                name: webshop-customer
+                port:
+                  number: 8003
+          - path: /api/order
+            pathType: Prefix
+            backend:
+              service:
+                name: webshop-order
+                port:
+                  number: 8004
+          - path: /api/events
+            pathType: Prefix
+            backend:
+              service:
+                name: webshop-eventbus
+                port:
+                  number: 4005
+---
+# Source: webshop/templates/initdb-job.yaml
+# templates/initdb-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: webshop-initdb
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: initdb
+        image: "docker.io/postgres:15-alpine"
+        env:
+        - name: PGHOST
+          value: "webshop-postgresql"
+        - name: PGPORT
+          value: "5432"
+        - name: PGPASSWORD
+          value: "senta"
+        command:
+        - sh
+        - -c
+        - |
+          set -e
+
+          # auf Postgres warten
+          until pg_isready -h "$PGHOST" -p "$PGPORT"; do
+            echo "waiting for postgres…"
+            sleep 2
+          done
+
+          # erst prüfen, dann anlegen
+          psql -U pidata -d postgres <<-EOSQL
+          DO
+          $$
+          BEGIN
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'cart_db') THEN
+              CREATE DATABASE cart_db OWNER pidata;
+            END IF;
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'catalog_db') THEN
+              CREATE DATABASE catalog_db OWNER pidata;
+            END IF;
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'customer_db') THEN
+              CREATE DATABASE customer_db OWNER pidata;
+            END IF;
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'order_db') THEN
+              CREATE DATABASE order_db OWNER pidata;
+            END IF;
+          END
+          $$;
+          EOSQL

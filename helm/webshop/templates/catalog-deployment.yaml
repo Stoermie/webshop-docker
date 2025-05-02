@@ -1,3 +1,4 @@
+# templates/catalog-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,24 +18,22 @@ spec:
         app.kubernetes.io/name: {{ .Release.Name }}-catalog
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      initContainers:
-        - name: wait-for-postgresql
-          image: busybox:1.35.0
-          command:
-            - sh
-            - -c
-            - |
-              until nc -z {{ .Release.Name }}-postgresql 5432; do
-                echo "waiting for postgresql at {{ .Release.Name }}-postgresql:5432"
-                sleep 2
-              done
       containers:
         - name: catalog
           image: "{{ .Values.catalog.image.repository }}:{{ .Values.catalog.image.tag }}"
+          command:
+            - python
+            - -m
+            - uvicorn
+            - main:app
+            - --host
+            - "0.0.0.0"
+            - --port
+            - "{{ .Values.catalog.port }}"
           ports:
             - containerPort: {{ .Values.catalog.port }}
           env:
             - name: DATABASE_URL
-              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Release.Name }}-postgresql:5432/{{ .Values.catalog.database }}"
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Release.Name }}-postgresql:{{ .Values.postgresql.primary.service.ports.postgresql }}/{{ .Values.catalog.database }}"
             - name: EVENT_BUS_URL
-              value: http://{{ .Release.Name }}-eventbus:{{ .Values.eventbus.port }}
+              value: "http://{{ .Release.Name }}-eventbus:{{ .Values.eventbus.port }}"

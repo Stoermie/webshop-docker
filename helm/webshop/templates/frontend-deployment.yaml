@@ -1,3 +1,4 @@
+# templates/frontend-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -24,20 +25,20 @@ spec:
             - containerPort: {{ .Values.frontend.port }}
           env:
             - name: REACT_APP_API_CATALOG
-              value: {{ .Values.frontend.api.catalog }}
+              value: "{{ .Values.frontend.api.catalog }}"
             - name: REACT_APP_API_CART
-              value: {{ .Values.frontend.api.cart }}
+              value: "{{ .Values.frontend.api.cart }}"
             - name: REACT_APP_API_CUSTOMER
-              value: {{ .Values.frontend.api.customer }}
+              value: "{{ .Values.frontend.api.customer }}"
             - name: REACT_APP_API_ORDER
-              value: {{ .Values.frontend.api.order }}
+              value: "{{ .Values.frontend.api.order }}"
             - name: REACT_APP_API_EVENTS
-              value: {{ .Values.frontend.api.events }}
+              value: "{{ .Values.frontend.api.events }}"
           livenessProbe:
             httpGet:
               path: /
               port: {{ .Values.frontend.port }}
-            initialDelaySeconds: 20
+            initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
             httpGet:

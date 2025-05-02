@@ -1,6 +1,5 @@
 # values.yaml
 
-# Anzahl der Replikas für alle Deployments
 replicaCount: 2
 
 # Catalog-Service
@@ -10,6 +9,10 @@ catalog:
     tag: arm64-latest
   port: 8001
   database: catalog_db
+  service:
+    type: NodePort
+    port: 8001
+    nodePort: 30081
 
 # Cart-Service
 cart:
@@ -18,6 +21,10 @@ cart:
     tag: arm64-latest
   port: 8002
   database: cart_db
+  service:
+    type: NodePort
+    port: 8002
+    nodePort: 30082
 
 # Customer-Service
 customer:
@@ -26,6 +33,10 @@ customer:
     tag: arm64-latest
   port: 8003
   database: customer_db
+  service:
+    type: NodePort
+    port: 8003
+    nodePort: 30083
 
 # Order-Service
 order:
@@ -34,6 +45,10 @@ order:
     tag: arm64-latest
   port: 8004
   database: order_db
+  service:
+    type: NodePort
+    port: 8004
+    nodePort: 30084
 
 # Event-Bus
 eventbus:
@@ -41,7 +56,10 @@ eventbus:
     repository: docker.io/stoermi/event-service
     tag: arm64-latest
   port: 4005
-  nodePort: 30014
+  service:
+    type: NodePort
+    port: 4005
+    nodePort: 30085
 
 # Frontend
 frontend:
@@ -49,13 +67,20 @@ frontend:
     repository: docker.io/stoermi/frontend
     tag: arm64-latest
   port: 80
-  api:
-    catalog: /api/catalog
-    cart:    /api/cart
-    customer: /api/customer
-    order:   /api/order
-    events:  /api/events
+  service:
+    type: NodePort
+    port: 80
+    nodePort: 30080
 
+  # Absolute Endpunkte auf die NodePorts
+  api:
+    catalog:  "http://192.168.178.122:30081/api/articles"
+    cart:     "http://192.168.178.122:30082/api/carts"
+    customer: "http://192.168.178.122:30083/api/customers"
+    order:    "http://192.168.178.122:30084/api/orders"
+    events:   "http://192.168.178.122:30085/events"
+
+# PostgreSQL
 postgresql:
   image:
     registry: docker.io
@@ -63,10 +88,10 @@ postgresql:
     tag: 15-alpine
 
   auth:
-    postgresPassword: senta   # Superuser “postgres”
-    username: pidata          # Custom-User
-    password: senta           # dessen Passwort
-    database: postgres        # Default-DB in der psql-Shell
+    postgresPassword: senta
+    username: pidata
+    password: senta
+    database: postgres
 
   primary:
     initdb:
@@ -79,50 +104,18 @@ postgresql:
             CREATE DATABASE IF NOT EXISTS order_db    OWNER pidata;
             CREATE DATABASE IF NOT EXISTS cart_db     OWNER pidata;
           EOSQL
-
     service:
       type: NodePort
       ports:
         postgresql: 5432
       nodePorts:
         postgresql: 30016
-
     serviceName: webshop-postgresql
     port:        5432
 
-
-# Service-Exposure für Deinen Ingress-Controller
-ingressService:
-  nodePort: 30080
+# Kein Ingress mehr, wir exposen alles über NodePort
+ingress:
+  enabled: false
 
 extraDeploy:
   - templates/initdb-job.yaml
-
-# Ingress-Routing
-ingress:
-  enabled: true
-  paths:
-    - name: frontend
-      path: /
-      service: frontend
-      port: 80
-    - name: catalog
-      path: /api/catalog
-      service: catalog
-      port: 8001
-    - name: cart
-      path: /api/cart
-      service: cart
-      port: 8002
-    - name: customer
-      path: /api/customer
-      service: customer
-      port: 8003
-    - name: order
-      path: /api/order
-      service: order
-      port: 8004
-    - name: events
-      path: /api/events
-      service: eventbus
-      port: 4005
