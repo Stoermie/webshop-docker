@@ -59,7 +59,7 @@ eventbus:
 frontend:
   image:
     repository: docker.io/stoermi/frontend
-    tag: 870463f6f0261a6d2c1503a684d72c2ece145be9
+    tag: b3df38265bc0238275e111a8c50906ea77e005d3
   port: 80
   service:
     type: NodePort
@@ -93,4 +93,4 @@ postgresql:
     port: 5432
 cartService:
   image:
-    tag: 870463f6f0261a6d2c1503a684d72c2ece145be9
+    tag: b3df38265bc0238275e111a8c50906ea77e005d3
