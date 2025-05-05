@@ -46,7 +46,38 @@ jobs:
           push: true
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }}
 
-      # … wiederhole das für catalog-service, customer-service, order-service, event-service …
+      - name: Build & Push catalog-service
+        uses: docker/build-push-action@v3
+        with:
+          context: catalog-service
+          file: catalog-service/Dockerfile
+          push: true
+          tags: docker.io/${{ secrets.DOCKER_USERNAME }}/catalog-service:${{ github.sha }}
+
+      - name: Build & Push customer-service
+        uses: docker/build-push-action@v3
+        with:
+          context: customer-service
+          file: customer-service/Dockerfile
+          push: true
+          tags: docker.io/${{ secrets.DOCKER_USERNAME }}/customer-service:${{ github.sha }}
+
+      - name: Build & Push order-service
+        uses: docker/build-push-action@v3
+        with:
+          context: order-service
+          file: order-service/Dockerfile
+          push: true
+          tags: docker.io/${{ secrets.DOCKER_USERNAME }}/order-service:${{ github.sha }}
+
+      - name: Build & Push event-service
+        uses: docker/build-push-action@v3
+        with:
+          context: event-service
+          file: event-service/Dockerfile
+          push: true
+          tags: docker.io/${{ secrets.DOCKER_USERNAME }}/event-service:${{ github.sha }}
+
 
       # 4) Helm-Chart updaten
       - name: Bump Helm Chart Image Tags
