@@ -31,7 +31,7 @@ jobs:
 
       # --- jetzt alle Micro-Services durchbauen und pushen ---
       - name: Build & Push frontend
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: frontend
           file: frontend/Dockerfile
@@ -39,7 +39,7 @@ jobs:
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/webshop-frontend:${{ github.sha }}
 
       - name: Build & Push cart-service
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: cart-service
           file: cart-service/Dockerfile
@@ -47,7 +47,7 @@ jobs:
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }}
 
       - name: Build & Push catalog-service
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: catalog-service
           file: catalog-service/Dockerfile
@@ -55,7 +55,7 @@ jobs:
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/catalog-service:${{ github.sha }}
 
       - name: Build & Push customer-service
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: customer-service
           file: customer-service/Dockerfile
@@ -63,7 +63,7 @@ jobs:
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/customer-service:${{ github.sha }}
 
       - name: Build & Push order-service
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: order-service
           file: order-service/Dockerfile
@@ -71,7 +71,7 @@ jobs:
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/order-service:${{ github.sha }}
 
       - name: Build & Push event-service
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: event-service
           file: event-service/Dockerfile
