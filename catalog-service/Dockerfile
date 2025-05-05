@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM python:3.10-slim AS builder
+FROM python:3.13-slim AS builder
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools \
@@ -7,7 +7,7 @@ RUN pip install --upgrade pip setuptools \
 COPY . .
 
 # Stage 2: Runtime
-FROM python:3.10-slim
+FROM python:3.13-slim
 WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 COPY --from=builder /app /app
