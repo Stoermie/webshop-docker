@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webshop
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: 'https://github.com/Stoermie/webshop-docker.git'   # dein Infra-Repo
+    targetRevision: HEAD                                        # oder z.B. main
+    path: 'helm/webshop'                                        # Pfad zu deinem Chart
+
+    helm:
+      valueFiles:
+        - values.production.yaml                               # dein Produktions-Values
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: webshop                                         # Namespace, in dem dein Chart läuft
+
+  syncPolicy:
+    automated:
+      prune: true       # entferne Ressourcen, die im Chart gelöscht wurden
+      selfHeal: true    # stelle bei manuellen Änderungen den Git-Zustand wieder her
+    retry:
+      limit: 5
