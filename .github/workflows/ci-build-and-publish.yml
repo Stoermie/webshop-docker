@@ -96,9 +96,9 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          # 1) Hol Dir erst den neuesten Stand von main:
-          git pull --rebase origin main
-          # 2) Werte deine Änderung in values.yaml ein:
+          # 1) Hol Dir den neuesten Stand, stash automatisch unsere Änderungen:
+          git pull --rebase origin main --autostash
+          # 2) Stage & commit nur, wenn sich was geändert hat:
           git add helm/webshop/values.yaml
           git diff --quiet --cached || git commit -m "ci: bump helm images to ${GITHUB_SHA}"
           # 3) Push zurück nach main
