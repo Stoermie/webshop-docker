@@ -1,5 +1,5 @@
 # ─── Builder ─────────────────────────────────
-FROM python:3.10-slim AS builder
+FROM python:3.13-slim AS builder
 WORKDIR /app
 
 COPY requirements.txt .
@@ -9,7 +9,7 @@ RUN pip install --upgrade pip setuptools \
 COPY . .
 
 # ─── Runtime ─────────────────────────────────
-FROM python:3.10-slim
+FROM python:3.13-slim
 WORKDIR /app
 
 # Nur die Libs und den App-Code kopieren
