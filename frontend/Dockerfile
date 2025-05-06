@@ -1,7 +1,7 @@
 # frontend/Dockerfile
 
 # ─── Builder ─────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -12,7 +12,7 @@ COPY . ./
 RUN npm run build
 
 # ─── Dev (Hot‑Reload) ─────────────────────────
-FROM node:20-alpine AS dev
+FROM node:22-alpine AS dev
 WORKDIR /app
 
 # Build‑Artefakte und node_modules übernehmen
