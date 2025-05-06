@@ -59,7 +59,11 @@ eventbus:
 frontend:
   image:
     repository: docker.io/stoermi/frontend
+<<<<<<< Updated upstream
     tag: eec84d5e476c2816aea3abbafaf7492acec9f60a
+=======
+    tag: 20ac63899deba463ee0ef97bf994fc97815b44ac
+>>>>>>> Stashed changes
   port: 80
   service:
     type: NodePort
@@ -93,4 +97,8 @@ postgresql:
     port: 5432
 cartService:
   image:
+<<<<<<< Updated upstream
     tag: eec84d5e476c2816aea3abbafaf7492acec9f60a
+=======
+    tag: 20ac63899deba463ee0ef97bf994fc97815b44ac
+>>>>>>> Stashed changes
