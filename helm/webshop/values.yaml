@@ -1,4 +1,5 @@
 replicaCount: 2
+
 # Catalog-Service
 catalog:
   image:
@@ -10,6 +11,7 @@ catalog:
     type: NodePort
     port: 8000
     nodePort: 30010
+
 # Cart-Service
 cart:
   image:
@@ -21,6 +23,7 @@ cart:
     type: NodePort
     port: 8002
     nodePort: 30011
+
 # Customer-Service
 customer:
   image:
@@ -32,6 +35,7 @@ customer:
     type: NodePort
     port: 8001
     nodePort: 30012
+
 # Order-Service
 order:
   image:
@@ -43,6 +47,7 @@ order:
     type: NodePort
     port: 8003
     nodePort: 30013
+
 # Event-Bus
 eventbus:
   image:
@@ -53,38 +58,35 @@ eventbus:
     type: NodePort
     port: 4005
     nodePort: 30014
+
 # Frontend
 frontend:
   image:
-<<<<<<< Updated upstream
-    repository: docker.io/stoermi/frontend
-    tag: 64498029a5f5b6e83f64a9cf08b26fccda8617e6
-=======
     repository: docker.io/stoermi/webshop-frontend
     tag: 7787b249a4b0800a7764276189863bbe65e227ce
->>>>>>> Stashed changes
   port: 80
   service:
     type: NodePort
     port: 80
     nodePort: 30003
   api:
-    catalog: "http://192.168.178.122:30010/api/articles"
-    cart: "http://192.168.178.122:30011/carts"
+    catalog:  "http://192.168.178.122:30010/api/articles"
+    cart:     "http://192.168.178.122:30011/carts"
     customer: "http://192.168.178.122:30012/customers"
-    order: "http://192.168.178.122:30013/orders"
-    events: "http://192.168.178.122:30014/events"
+    order:    "http://192.168.178.122:30013/orders"
+    events:   "http://192.168.178.122:30014/events"
+
 # PostgreSQL
 postgresql:
   image:
-    registry: docker.io
+    registry:   docker.io
     repository: postgres
-    tag: 17-alpine
+    tag:        17-alpine
   auth:
     postgresPassword: senta
-    username: pidata
-    password: senta
-    database: postgres
+    username:         pidata
+    password:         senta
+    database:         postgres
   primary:
     service:
       type: NodePort
@@ -93,7 +95,8 @@ postgresql:
       nodePorts:
         postgresql: 30016
     serviceName: webshop-postgresql
-    port: 5432
+    port:        5432
+
 # Helm-Chart-Helper (für Bump-Actions)
 cartService:
   image:
