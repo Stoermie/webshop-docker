@@ -29,12 +29,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # --- jetzt alle Micro-Services durchbauen und pushen ---
+      # --- jetzt alle Micro-Services multi-arch bauen und pushen ---
       - name: Build & Push frontend
         uses: docker/build-push-action@v6
         with:
           context: frontend
           file: frontend/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/webshop-frontend:${{ github.sha }}
 
@@ -43,6 +44,7 @@ jobs:
         with:
           context: cart-service
           file: cart-service/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/cart-service:${{ github.sha }}
 
@@ -51,6 +53,7 @@ jobs:
         with:
           context: catalog-service
           file: catalog-service/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/catalog-service:${{ github.sha }}
 
@@ -59,6 +62,7 @@ jobs:
         with:
           context: customer-service
           file: customer-service/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/customer-service:${{ github.sha }}
 
@@ -67,6 +71,7 @@ jobs:
         with:
           context: order-service
           file: order-service/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/order-service:${{ github.sha }}
 
@@ -75,31 +80,32 @@ jobs:
         with:
           context: event-service
           file: event-service/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/event-service:${{ github.sha }}
 
-
-      # 4) Helm-Chart updaten
+      # 4) Helm-Chart updaten: bumpen aller Services auf den neuen SHA
       - name: Bump Helm Chart Image Tags
         run: |
-          # wir setzen in values.yaml für jeden Service das neue SHA-Tag
-          yq eval -i ".frontend.image.tag = \"${GITHUB_SHA}\"" helm/webshop/values.yaml
-          yq eval -i ".cartService.image.tag = \"${GITHUB_SHA}\"" helm/webshop/values.yaml
-          # … analog für alle Services …
+          yq eval -i ".frontend.image.tag   = \"${GITHUB_SHA}\"" helm/webshop/values.yaml
+          yq eval -i ".cart.image.tag       = \"${GITHUB_SHA}\"" helm/webshop/values.yaml
+          yq eval -i ".catalog.image.tag    = \"${GITHUB_SHA}\"" helm/webshop/values.yaml
+          yq eval -i ".customer.image.tag   = \"${GITHUB_SHA}\"" helm/webshop/values.yaml
+          yq eval -i ".order.image.tag      = \"${GITHUB_SHA}\"" helm/webshop/values.yaml
+          yq eval -i ".eventbus.image.tag   = \"${GITHUB_SHA}\"" helm/webshop/values.yaml
         env:
           GITHUB_SHA: ${{ github.sha }}
 
-      # 5) Commit & Push values.yaml
+      # 5) Commit & Push updated values.yaml
       - name: Commit Chart Update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          # 1) Hol Dir den neuesten Stand, stash automatisch unsere Änderungen:
+          # Hol erst remote; stash unsere Änderungen automatisch
           git pull --rebase origin main --autostash
-          # 2) Stage & commit nur, wenn sich was geändert hat:
+          # Stage & commit nur, wenn values.yaml wirklich anders ist
           git add helm/webshop/values.yaml
           git diff --quiet --cached || git commit -m "ci: bump helm images to ${GITHUB_SHA}"
-          # 3) Push zurück nach main
           git push origin main
