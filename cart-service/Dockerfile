@@ -1,5 +1,5 @@
 # ─── Base Image ─────────────────────────────────
-FROM python:3.10-slim
+FROM python:3.13-slim
 WORKDIR /app
 
 # 1) Abhängigkeiten installieren (nur bei Änderungen in requirements.txt)
