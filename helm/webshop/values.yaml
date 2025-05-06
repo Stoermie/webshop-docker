@@ -56,8 +56,13 @@ eventbus:
 # Frontend
 frontend:
   image:
+<<<<<<< Updated upstream
     repository: docker.io/stoermi/frontend
     tag: 64498029a5f5b6e83f64a9cf08b26fccda8617e6
+=======
+    repository: docker.io/stoermi/webshop-frontend
+    tag: 7787b249a4b0800a7764276189863bbe65e227ce
+>>>>>>> Stashed changes
   port: 80
   service:
     type: NodePort
