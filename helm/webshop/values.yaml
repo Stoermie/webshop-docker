@@ -60,9 +60,13 @@ frontend:
   image:
     repository: docker.io/stoermi/frontend
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     tag: eec84d5e476c2816aea3abbafaf7492acec9f60a
 =======
     tag: 20ac63899deba463ee0ef97bf994fc97815b44ac
+>>>>>>> Stashed changes
+=======
+    tag: 2ae5ff005fac85a923885f1fcb9257fa8dac30ba
 >>>>>>> Stashed changes
   port: 80
   service:
@@ -98,7 +102,11 @@ postgresql:
 cartService:
   image:
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     tag: eec84d5e476c2816aea3abbafaf7492acec9f60a
 =======
     tag: 20ac63899deba463ee0ef97bf994fc97815b44ac
+>>>>>>> Stashed changes
+=======
+    tag: 2ae5ff005fac85a923885f1fcb9257fa8dac30ba
 >>>>>>> Stashed changes
