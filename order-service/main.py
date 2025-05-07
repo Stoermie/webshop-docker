@@ -9,6 +9,11 @@ from typing import List
 
 EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "http://event_bus:4005")
 
+origins = [
+    "http://localhost:3000",          # falls du lokal entwickelst
+    "http://192.168.178.122:30003",   # deine NodePort-Adresse für das Frontend
+]
+
 async def publish_event(event: dict):
     try:
         async with httpx.AsyncClient() as client:

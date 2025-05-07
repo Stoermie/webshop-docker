@@ -20,6 +20,11 @@ async def publish_event(event: dict):
 # Datenbank-Tabellen erzeugen
 models.Base.metadata.create_all(bind=engine)
 
+origins = [
+    "http://localhost:3000",          # falls du lokal entwickelst
+    "http://192.168.178.122:30003",   # deine NodePort-Adresse für das Frontend
+]
+
 # FastAPI-Instanz\app = FastAPI(title="Customer Service")
 app = FastAPI(title="Customer Service")
 app.add_middleware(

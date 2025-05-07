@@ -22,6 +22,11 @@ async def publish_event(event: dict):
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Cart Service")
 
+origins = [
+    "http://localhost:3000",          # falls du lokal entwickelst
+    "http://192.168.178.122:30003",   # deine NodePort-Adresse für das Frontend
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

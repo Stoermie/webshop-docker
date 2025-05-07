@@ -5,6 +5,11 @@ import httpx
 
 app = FastAPI(title="Event Bus")
 
+origins = [
+    "http://localhost:3000",          # falls du lokal entwickelst
+    "http://192.168.178.122:30003",   # deine NodePort-Adresse für das Frontend
+]
+
 # CORS, damit Frontend (falls nötig) und alle Services posten dürfen
 app.add_middleware(
     CORSMiddleware,

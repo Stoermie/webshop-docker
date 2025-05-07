@@ -18,6 +18,11 @@ async def publish_event(event: dict):
     except Exception as e:
         print(f"⚠️ Fehler beim Senden an Event-Bus: {e}")
 
+origins = [
+    "http://localhost:3000",          # falls du lokal entwickelst
+    "http://192.168.178.122:30003",   # deine NodePort-Adresse für das Frontend
+]
+
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Catalog Service")
 app.add_middleware(
