@@ -6,16 +6,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
+  background: transparent;          /* statt hellgrau, jetzt durchsichtig */
   font-family: 'Segoe UI', sans-serif;
 }
 
 /* Card */
 .login-card {
-  background: #fff;
+  background: rgba(255,255,255,0.8); /* leicht milchig-transparent */
   padding: 2.5rem 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04); /* soften Shadow, optional */
   width: 100%;
   max-width: 360px;
   text-align: center;
