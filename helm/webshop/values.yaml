@@ -62,7 +62,7 @@ eventbus:
 # Frontend
 frontend:
   image:
-    repository: docker.io/stoermi/webshop-frontend
+    repository: docker.io/stoermi/frontend
     tag:        7787b249a4b0800a7764276189863bbe65e227ce
   port: 80
   service:

@@ -37,7 +37,7 @@ jobs:
           file: frontend/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: docker.io/${{ secrets.DOCKER_USERNAME }}/webshop-frontend:${{ github.sha }}
+          tags: docker.io/${{ secrets.DOCKER_USERNAME }}/frontend:${{ github.sha }}
 
       - name: Build & Push cart-service
         uses: docker/build-push-action@v6
