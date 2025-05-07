@@ -1,6 +1,6 @@
 // src/components/Cart.js
 import React, { useState, useEffect } from 'react';
-import axios from '../axios'; // Deine konfigurierte Axios-Instanz
+import axios from '../axios';
 import { Link } from 'react-router-dom';
 import './Cart.css';
 
@@ -10,14 +10,16 @@ export default function Cart() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const CART_API = process.env.REACT_APP_API_CART; // z.B. "http://192.168.178.122:30011/api/carts"
+  // Basis-URL deines Cart-Services
+  const CART_API = process.env.REACT_APP_API_CART; // z.B. "http://192.168.178.122:30011"
   const ARTICLE_API = `${process.env.REACT_APP_API_CATALOG}/api`;
 
   // Liefert bestehende Cart-ID oder erzeugt eine neue
   const getCartId = async () => {
     let id = localStorage.getItem('cartId');
     if (!id) {
-      const res = await axios.post(`${CART_API}`, {});
+      // POST /carts
+      const res = await axios.post(`${CART_API}/carts`, {});
       id = res.data.id;
       localStorage.setItem('cartId', id);
     }
@@ -30,7 +32,8 @@ export default function Cart() {
     (async () => {
       try {
         const id = await getCartId();
-        const res = await axios.get(`${CART_API}/${id}`);
+        // GET /carts/{id}
+        const res = await axios.get(`${CART_API}/carts/${id}`);
         setRawItems(res.data.items || []);
       } catch {
         setRawItems([]);
@@ -57,7 +60,8 @@ export default function Cart() {
   }, [rawItems]);
 
   const refreshCart = async () => {
-    const res = await axios.get(`${CART_API}/${cartId}`);
+    // GET /carts/{id}
+    const res = await axios.get(`${CART_API}/carts/${cartId}`);
     setRawItems(res.data.items || []);
   };
 
@@ -69,8 +73,9 @@ export default function Cart() {
       return;
     }
     try {
+      // POST /carts/{id}/items
       await axios.post(
-        `${CART_API}/${cartId}/items`,
+        `${CART_API}/carts/${cartId}/items`,
         { article_id: item.article_id, quantity: delta }
       );
       await refreshCart();
@@ -82,8 +87,9 @@ export default function Cart() {
 
   const removeItem = async (itemId) => {
     try {
+      // DELETE /carts/{id}/items/{itemId}
       await axios.delete(
-        `${CART_API}/${cartId}/items/${itemId}`
+        `${CART_API}/carts/${cartId}/items/${itemId}`
       );
       await refreshCart();
     } catch (err) {
