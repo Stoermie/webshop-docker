@@ -3,11 +3,8 @@ replicaCount: 2
 catalog:
   image:
     repository: docker.io/stoermi/catalog-service
-<<<<<<< Updated upstream
     tag: 01b15047fb219d3a326297f68d1bd8a1c5570c61
-=======
     tag: 0679e5e425980a7da0a63a32b49bf84cb708a146
->>>>>>> Stashed changes
   port: 8000
   database: catalog_db
   service:
@@ -18,11 +15,8 @@ catalog:
 cart:
   image:
     repository: docker.io/stoermi/cart-service
-<<<<<<< Updated upstream
     tag: 01b15047fb219d3a326297f68d1bd8a1c5570c61
-=======
     tag: 0679e5e425980a7da0a63a32b49bf84cb708a146
->>>>>>> Stashed changes
   port: 8002
   database: cart_db
   service:
@@ -33,11 +27,8 @@ cart:
 customer:
   image:
     repository: docker.io/stoermi/customer-service
-<<<<<<< Updated upstream
     tag: 01b15047fb219d3a326297f68d1bd8a1c5570c61
-=======
     tag: 0679e5e425980a7da0a63a32b49bf84cb708a146
->>>>>>> Stashed changes
   port: 8001
   database: customer_db
   service:
@@ -48,11 +39,8 @@ customer:
 order:
   image:
     repository: docker.io/stoermi/order-service
-<<<<<<< Updated upstream
     tag: 01b15047fb219d3a326297f68d1bd8a1c5570c61
-=======
     tag: 0679e5e425980a7da0a63a32b49bf84cb708a146
->>>>>>> Stashed changes
   port: 8003
   database: order_db
   service:
@@ -63,11 +51,8 @@ order:
 eventbus:
   image:
     repository: docker.io/stoermi/event-service
-<<<<<<< Updated upstream
     tag: 01b15047fb219d3a326297f68d1bd8a1c5570c61
-=======
     tag: 0679e5e425980a7da0a63a32b49bf84cb708a146
->>>>>>> Stashed changes
   port: 4005
   service:
     type: NodePort
@@ -77,11 +62,8 @@ eventbus:
 frontend:
   image:
     repository: docker.io/stoermi/frontend
-<<<<<<< Updated upstream
     tag: 01b15047fb219d3a326297f68d1bd8a1c5570c61
-=======
     tag: 0679e5e425980a7da0a63a32b49bf84cb708a146
->>>>>>> Stashed changes
   port: 80
   service:
     type: NodePort
