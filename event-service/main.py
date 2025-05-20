@@ -2,8 +2,12 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 app = FastAPI(title="Event Bus")
+Instrumentator().instrument(app).expose(app)
+
 
 origins = [
     "http://localhost:3000",          # falls du lokal entwickelst

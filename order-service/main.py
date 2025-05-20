@@ -6,6 +6,8 @@ import httpx
 import crud, schemas, models
 from database import SessionLocal, engine
 from typing import List
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "http://event_bus:4005")
 
@@ -23,6 +25,8 @@ async def publish_event(event: dict):
 
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
+Instrumentator().instrument(app).expose(app)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

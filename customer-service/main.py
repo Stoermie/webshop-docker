@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import os
 import httpx
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 import crud, schemas, models
 from database import SessionLocal, engine
@@ -27,6 +29,8 @@ origins = [
 
 # FastAPI-Instanz\app = FastAPI(title="Customer Service")
 app = FastAPI(title="Customer Service")
+Instrumentator().instrument(app).expose(app)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

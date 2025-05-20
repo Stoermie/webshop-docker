@@ -17,6 +17,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ .Release.Name }}-order
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "{{ .Values.order.port }}"
     spec:
       containers:
         - name: order

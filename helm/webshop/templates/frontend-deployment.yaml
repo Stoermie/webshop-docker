@@ -16,6 +16,10 @@ spec:
       labels:
         app.kubernetes.io/name:     {{ .Release.Name }}-frontend
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "{{ .Values.frontend.port }}"
     spec:
       containers:
         - name: frontend

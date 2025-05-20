@@ -1,4 +1,3 @@
-# templates/cart-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,6 +16,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ .Release.Name }}-cart
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "{{ .Values.cart.port }}"
     spec:
       containers:
         - name: cart

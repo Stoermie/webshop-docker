@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 import os
 import httpx
 from typing import List
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 from database import SessionLocal, engine, Base
 from models import Article
@@ -25,6 +27,8 @@ origins = [
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Catalog Service")
+Instrumentator().instrument(app).expose(app)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

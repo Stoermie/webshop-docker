@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import os
 import httpx
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 from database import SessionLocal, engine, Base
 from models import Cart, CartItem
@@ -21,6 +23,8 @@ async def publish_event(event: dict):
 # DB setup
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Cart Service")
+Instrumentator().instrument(app).expose(app)
+
 
 origins = [
     "http://localhost:3000",          # falls du lokal entwickelst
