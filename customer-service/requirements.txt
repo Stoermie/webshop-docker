@@ -7,4 +7,4 @@ email-validator
 python-jose[cryptography]
 httpx==0.28.1
 bcrypt
-prometheus-fastapi-instrumentator>=6.1.0,<7.0.0
+prometheus-fastapi-instrumentator>=7.1.0,<7.2.0
