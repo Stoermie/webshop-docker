@@ -1,98 +1,91 @@
 replicaCount: 2
-
 # Catalog-Service
 catalog:
   image:
     repository: docker.io/stoermi/catalog-service
-    tag:        64498029a5f5b6e83f64a9cf08b26fccda8617e6
-  port:     8000
+    tag: fdf280192c7a03b3ea2d6f8455917d96b0065ff0
+  port: 8000
   database: catalog_db
   service:
-    type:     NodePort
-    port:     8000
+    type: NodePort
+    port: 8000
     nodePort: 30010
-
 # Cart-Service
 cart:
   image:
     repository: docker.io/stoermi/cart-service
-    tag:        64498029a5f5b6e83f64a9cf08b26fccda8617e6
-  port:     8002
+    tag: fdf280192c7a03b3ea2d6f8455917d96b0065ff0
+  port: 8002
   database: cart_db
   service:
-    type:     NodePort
-    port:     8002
+    type: NodePort
+    port: 8002
     nodePort: 30011
-
 # Customer-Service
 customer:
   image:
     repository: docker.io/stoermi/customer-service
-    tag:        64498029a5f5b6e83f64a9cf08b26fccda8617e6
-  port:     8001
+    tag: fdf280192c7a03b3ea2d6f8455917d96b0065ff0
+  port: 8001
   database: customer_db
   service:
-    type:     NodePort
-    port:     8001
+    type: NodePort
+    port: 8001
     nodePort: 30012
-
 # Order-Service
 order:
   image:
     repository: docker.io/stoermi/order-service
-    tag:        64498029a5f5b6e83f64a9cf08b26fccda8617e6
-  port:     8003
+    tag: fdf280192c7a03b3ea2d6f8455917d96b0065ff0
+  port: 8003
   database: order_db
   service:
-    type:     NodePort
-    port:     8003
+    type: NodePort
+    port: 8003
     nodePort: 30013
-
 # Event-Bus
 eventbus:
   image:
     repository: docker.io/stoermi/event-service
-    tag:        64498029a5f5b6e83f64a9cf08b26fccda8617e6
-  port:     4005
+    tag: fdf280192c7a03b3ea2d6f8455917d96b0065ff0
+  port: 4005
   service:
-    type:     NodePort
-    port:     4005
+    type: NodePort
+    port: 4005
     nodePort: 30014
-
 # Frontend
 frontend:
   image:
     repository: docker.io/stoermi/frontend
-    tag:        7787b249a4b0800a7764276189863bbe65e227ce
+    tag: fdf280192c7a03b3ea2d6f8455917d96b0065ff0
   port: 80
   service:
-    type:     NodePort
-    port:     80
+    type: NodePort
+    port: 80
     nodePort: 30003
   api:
-    catalog:  "http://192.168.178.122:30010/api/articles"
-    cart:     "http://192.168.178.122:30011/carts"
+    catalog: "http://192.168.178.122:30010/api/articles"
+    cart: "http://192.168.178.122:30011/carts"
     customer: "http://192.168.178.122:30012/customers"
-    order:    "http://192.168.178.122:30013/orders"
-    events:   "http://192.168.178.122:30014/events"
-
+    order: "http://192.168.178.122:30013/orders"
+    events: "http://192.168.178.122:30014/events"
 # PostgreSQL
 postgresql:
   image:
-    registry:   docker.io
+    registry: docker.io
     repository: postgres
-    tag:        17-alpine
+    tag: 17-alpine
   auth:
     postgresPassword: senta
-    username:         pidata
-    password:         senta
-    database:         postgres
+    username: pidata
+    password: senta
+    database: postgres
   primary:
     service:
-      type:     NodePort
+      type: NodePort
       ports:
         postgresql: 5432
       nodePorts:
         postgresql: 30016
     serviceName: webshop-postgresql
-    port:        5432
+    port: 5432
