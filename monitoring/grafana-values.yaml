@@ -4,7 +4,7 @@ adminPassword: admin
 service:
   type: NodePort
   port: 80
-  nodePort: 30090   # Port im Bereich 30000–32767 frei wählen
+  nodePort: 30090  
 
 ingress:
   enabled: false

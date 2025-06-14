@@ -1,4 +1,5 @@
 ---
+# Source: webshop/charts/postgresql/templates/secrets.yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -13,7 +14,9 @@ type: Opaque
 data:
   postgres-password: "c2VudGE="
   password: "c2VudGE="
+  # We don't auto-generate LDAP password when it's not provided as we do for other passwords
 ---
+# Source: webshop/charts/postgresql/templates/primary/initialization-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -34,6 +37,7 @@ data:
       CREATE DATABASE IF NOT EXISTS cart_db     OWNER pidata;
     EOSQL
 ---
+# Source: webshop/charts/postgresql/templates/primary/svc-headless.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -45,10 +49,17 @@ metadata:
     app.kubernetes.io/instance: webshop
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: primary
+    # Use this annotation in addition to the actual publishNotReadyAddresses
+    # field below because the annotation will stop being respected soon but the
+    # field is broken in some versions of Kubernetes:
+    # https://github.com/kubernetes/kubernetes/issues/58662
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
   type: ClusterIP
   clusterIP: None
+  # We want all pods in the StatefulSet to have their addresses published for
+  # the sake of the other Postgresql pods even before they're ready, since they
+  # have to be able to talk to each other in order to become ready.
   publishNotReadyAddresses: true
   ports:
     - name: tcp-postgresql
@@ -59,6 +70,7 @@ spec:
     app.kubernetes.io/instance: webshop
     app.kubernetes.io/component: primary
 ---
+# Source: webshop/charts/postgresql/templates/primary/svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -85,6 +97,7 @@ spec:
     app.kubernetes.io/instance: webshop
     app.kubernetes.io/component: primary
 ---
+# Source: webshop/templates/cart-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -97,6 +110,7 @@ spec:
   selector:
     app: webshop-cart
 ---
+# Source: webshop/templates/catalog-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -109,6 +123,7 @@ spec:
   selector:
     app: webshop-catalog
 ---
+# Source: webshop/templates/customer-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -121,6 +136,7 @@ spec:
   selector:
     app: webshop-customer
 ---
+# Source: webshop/templates/eventbus-deplyoment.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -139,6 +155,7 @@ spec:
       targetPort: 4005
       protocol: TCP
 ---
+# Source: webshop/templates/frontend-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -156,6 +173,7 @@ spec:
       targetPort: 80
       protocol: TCP
 ---
+# Source: webshop/templates/ingress-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -171,6 +189,7 @@ spec:
       targetPort: 80
       nodePort: 30080
 ---
+# Source: webshop/templates/order-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -183,6 +202,7 @@ spec:
   selector:
     app: webshop-order
 ---
+# Source: webshop/templates/cart-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -224,6 +244,7 @@ spec:
             - name: EVENT_BUS_URL
               value: http://webshop-eventbus:4005
 ---
+# Source: webshop/templates/catalog-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -265,6 +286,7 @@ spec:
             - name: EVENT_BUS_URL
               value: http://webshop-eventbus:4005
 ---
+# Source: webshop/templates/customer-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -297,6 +319,7 @@ spec:
             - name: EVENT_BUS_URL
               value: "http://webshop-eventbus:4005"
 ---
+# Source: webshop/templates/eventbus-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -579,6 +602,7 @@ spec:
           requests:
             storage: "8Gi"
 ---
+# Source: webshop/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -633,6 +657,8 @@ spec:
                 port:
                   number: 4005
 ---
+# Source: webshop/templates/initdb-job.yaml
+# templates/initdb-job.yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
