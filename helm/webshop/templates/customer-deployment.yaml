@@ -1,4 +1,4 @@
-
+# templates/customer-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,12 +35,9 @@ spec:
             - --port
             - "{{ .Values.customer.port }}"
           ports:
-            - name: http
-              containerPort: {{ .Values.customer.port }}
-            - name: metrics
-              containerPort: {{ .Values.customer.port }}
+            - containerPort: {{ .Values.customer.port }}
           env:
             - name: DATABASE_URL
-              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Values.postgresql.primary.service.host }}:{{ .Values.postgresql.primary.service.port }}/{{ .Values.customer.database }}"
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Release.Name }}-postgresql:{{ .Values.postgresql.primary.service.ports.postgresql }}/{{ .Values.customer.database }}"
             - name: EVENT_BUS_URL
               value: "http://{{ .Release.Name }}-eventbus:{{ .Values.eventbus.port }}"

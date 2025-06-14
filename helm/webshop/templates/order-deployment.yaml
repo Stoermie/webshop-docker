@@ -1,4 +1,4 @@
-
+# templates/order-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,12 +35,9 @@ spec:
             - --port
             - "{{ .Values.order.port }}"
           ports:
-            - name: http
-              containerPort: {{ .Values.order.port }}
-            - name: metrics
-              containerPort: {{ .Values.order.port }}
+            - containerPort: {{ .Values.order.port }}
           env:
             - name: DATABASE_URL
-              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Values.postgresql.primary.service.host }}:{{ .Values.postgresql.primary.service.port }}/{{ .Values.order.database }}"
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Release.Name }}-postgresql:{{ .Values.postgresql.primary.service.ports.postgresql }}/{{ .Values.order.database }}"
             - name: EVENT_BUS_URL
               value: "http://{{ .Release.Name }}-eventbus:{{ .Values.eventbus.port }}"
