@@ -9,7 +9,6 @@ export default function ProductList() {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get('search') || '';
 
-  // Bücher laden
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_API_CATALOG}/api/articles/`)

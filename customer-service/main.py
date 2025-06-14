@@ -9,7 +9,6 @@ from prometheus_fastapi_instrumentator import Instrumentator
 import crud, schemas, models
 from database import SessionLocal, engine
 
-# Event-Bus URL
 EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "http://event_bus:4005")
 
 async def publish_event(event: dict):
@@ -19,15 +18,13 @@ async def publish_event(event: dict):
     except Exception as e:
         print(f"⚠️ Fehler beim Senden an Event-Bus: {e}")
 
-# Datenbank-Tabellen erzeugen
 models.Base.metadata.create_all(bind=engine)
 
 origins = [
-    "http://localhost:3000",          # falls du lokal entwickelst
-    "http://192.168.178.122:30003",   # deine NodePort-Adresse für das Frontend
+    "http://localhost:3000",         
+    "http://192.168.178.122:30003",   
 ]
 
-# FastAPI-Instanz\app = FastAPI(title="Customer Service")
 app = FastAPI(title="Customer Service")
 Instrumentator().instrument(app).expose(app)
 
@@ -39,7 +36,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Health-Check
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -57,10 +53,8 @@ def create_customer(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    # Neuen Kunden anlegen
     user = crud.create_customer(db, cust_in)
 
-    # Event verschicken
     background_tasks.add_task(
         publish_event,
         {
@@ -96,5 +90,4 @@ async def handle_event(
     db: Session = Depends(get_db)
 ):
     evt = await req.json()
-    # Hier können wir eingehende Events verarbeiten
     return {"status": "ok"}

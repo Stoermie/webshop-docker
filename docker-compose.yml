@@ -79,7 +79,7 @@ services:
     working_dir: /app
     volumes:
       - ./order-service:/app 
-    ports:              # <— hier der Listentyp
+    ports:            
       - "8003:8003"
     depends_on:
       postgresdb:

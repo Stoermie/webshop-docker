@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,9 +35,12 @@ spec:
             - --port
             - "{{ .Values.cart.port }}"
           ports:
-            - containerPort: {{ .Values.cart.port }}
+            - name: http
+              containerPort: {{ .Values.cart.port }}
+            - name: metrics
+              containerPort: {{ .Values.cart.port }}
           env:
             - name: DATABASE_URL
-              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Release.Name }}-postgresql:{{ .Values.postgresql.primary.service.ports.postgresql }}/{{ .Values.cart.database }}"
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Values.postgresql.primary.service.host }}:{{ .Values.postgresql.primary.service.port }}/{{ .Values.cart.database }}"
             - name: EVENT_BUS_URL
               value: "http://{{ .Release.Name }}-eventbus:{{ .Values.eventbus.port }}"

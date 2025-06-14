@@ -16,7 +16,7 @@ function Header() {
     navigate(q ? `/?search=${encodeURIComponent(q)}` : '/');
   };
 
-  // Klick außerhalb schließt das Menü
+
   useEffect(() => {
     const handler = e => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {

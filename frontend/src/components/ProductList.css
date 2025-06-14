@@ -1,4 +1,3 @@
-/* src/components/ProductList.css */
 
 :root {
   --accent: #d64b4b;
@@ -9,7 +8,7 @@
   --border: #e2e8f0;
 }
 
-/* Container */
+
 .books-container {
   max-width: 1200px;
   margin: 2rem auto;
@@ -19,7 +18,7 @@
   color: var(--text);
 }
 
-/* Überschriften */
+
 .books-title {
   text-align: center;
   font-size: 2rem;
@@ -31,16 +30,15 @@
   margin-bottom: 1.5rem;
 }
 
-/* Flex-Layout für Karten */
+
 .books-grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center; /* zentriert auch Einzelkarte */
+  justify-content: center;
   gap: 1.5rem;
   margin-top: 1.5rem;
 }
 
-/* Jede Karte fix 200px breit */
 .book-card {
   flex: 0 0 200px;
   max-width: 200px;
@@ -58,11 +56,10 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
-/* Bildbereich */
 .book-image-wrap {
   position: relative;
   width: 100%;
-  padding-top: 130%; /* Verhältnis beibehalten */
+  padding-top: 130%; 
 }
 .book-image {
   position: absolute;
@@ -73,7 +70,7 @@
   object-fit: cover;
 }
 
-/* Textbereich */
+
 .book-body {
   padding: 0.75rem 1rem;
   display: flex;
@@ -99,7 +96,6 @@
   margin-bottom: 0.75rem;
 }
 
-/* Aktionen: Details + Warenkorb */
 .book-actions {
   display: flex;
   align-items: center;

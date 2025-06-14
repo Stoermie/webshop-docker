@@ -1,5 +1,19 @@
 adminUser: admin
 adminPassword: admin
+
 service:
   type: NodePort
-  nodePort: 30091
+  port: 80
+  nodePort: 30090   # Port im Bereich 30000–32767 frei wählen
+
+ingress:
+  enabled: false
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://192.168.178.122:30091

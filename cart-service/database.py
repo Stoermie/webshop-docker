@@ -4,7 +4,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Lies den DB‑URL aus der ENV, sonst Fallback
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql://piData:senta@postgresdb:5432/cart_db"

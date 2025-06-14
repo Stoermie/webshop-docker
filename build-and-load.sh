@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+
 set -euo pipefail
 
-# Service-Namen und Ports
+
 services=(catalog customer cart order event)
 frontend_dir="frontend"
 

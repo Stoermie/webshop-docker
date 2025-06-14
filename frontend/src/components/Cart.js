@@ -1,4 +1,3 @@
-// src/components/Cart.js
 import React, { useState, useEffect } from 'react';
 import axios from '../axios';
 import { Link } from 'react-router-dom';
@@ -10,15 +9,13 @@ export default function Cart() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Basis-URL deines Cart-Services
-  const CART_API = process.env.REACT_APP_API_CART; // z.B. "http://192.168.178.122:30011"
+
+  const CART_API = process.env.REACT_APP_API_CART; 
   const ARTICLE_API = `${process.env.REACT_APP_API_CATALOG}/api`;
 
-  // Liefert bestehende Cart-ID oder erzeugt eine neue
   const getCartId = async () => {
     let id = localStorage.getItem('cartId');
     if (!id) {
-      // POST /carts
       const res = await axios.post(`${CART_API}/carts`, {});
       id = res.data.id;
       localStorage.setItem('cartId', id);
@@ -27,12 +24,10 @@ export default function Cart() {
     return id;
   };
 
-  // Beim Mount Warenkorb laden
   useEffect(() => {
     (async () => {
       try {
         const id = await getCartId();
-        // GET /carts/{id}
         const res = await axios.get(`${CART_API}/carts/${id}`);
         setRawItems(res.data.items || []);
       } catch {
@@ -43,7 +38,6 @@ export default function Cart() {
     })();
   }, []);
 
-  // Ergänzt Items um Artikeldaten
   useEffect(() => {
     if (rawItems.length === 0) {
       setItems([]);
@@ -60,7 +54,6 @@ export default function Cart() {
   }, [rawItems]);
 
   const refreshCart = async () => {
-    // GET /carts/{id}
     const res = await axios.get(`${CART_API}/carts/${cartId}`);
     setRawItems(res.data.items || []);
   };
@@ -73,7 +66,6 @@ export default function Cart() {
       return;
     }
     try {
-      // POST /carts/{id}/items
       await axios.post(
         `${CART_API}/carts/${cartId}/items`,
         { article_id: item.article_id, quantity: delta }
@@ -87,7 +79,6 @@ export default function Cart() {
 
   const removeItem = async (itemId) => {
     try {
-      // DELETE /carts/{id}/items/{itemId}
       await axios.delete(
         `${CART_API}/carts/${cartId}/items/${itemId}`
       );

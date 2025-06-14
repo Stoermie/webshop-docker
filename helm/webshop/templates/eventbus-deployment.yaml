@@ -1,4 +1,4 @@
-# templates/eventbus-deployment.yaml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,7 +35,10 @@ spec:
             - --port
             - "{{ .Values.eventbus.port }}"
           ports:
-            - containerPort: {{ .Values.eventbus.port }}
+            - name: http
+              containerPort: {{ .Values.eventbus.port }}
+            - name: metrics
+              containerPort: {{ .Values.eventbus.port }}
           env:
             - name: PORT
               value: "{{ .Values.eventbus.port }}"

@@ -1,4 +1,4 @@
-# templates/catalog-deployment.yaml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,9 +35,12 @@ spec:
             - --port
             - "{{ .Values.catalog.port }}"
           ports:
-            - containerPort: {{ .Values.catalog.port }}
+            - name: http
+              containerPort: {{ .Values.catalog.port }}
+            - name: metrics
+              containerPort: {{ .Values.catalog.port }}
           env:
             - name: DATABASE_URL
-              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Release.Name }}-postgresql:{{ .Values.postgresql.primary.service.ports.postgresql }}/{{ .Values.catalog.database }}"
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Values.postgresql.primary.service.host }}:{{ .Values.postgresql.primary.service.port }}/{{ .Values.catalog.database }}"
             - name: EVENT_BUS_URL
               value: "http://{{ .Release.Name }}-eventbus:{{ .Values.eventbus.port }}"

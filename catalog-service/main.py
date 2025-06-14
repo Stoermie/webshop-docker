@@ -21,8 +21,8 @@ async def publish_event(event: dict):
         print(f"⚠️ Fehler beim Senden an Event-Bus: {e}")
 
 origins = [
-    "http://localhost:3000",          # falls du lokal entwickelst
-    "http://192.168.178.122:30003",   # deine NodePort-Adresse für das Frontend
+    "http://localhost:3000",          
+    "http://192.168.178.122:30003",   
 ]
 
 Base.metadata.create_all(bind=engine)
@@ -36,7 +36,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Health-Check
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -55,7 +54,6 @@ def create_article(a: ArticleCreateSchema, db: Session = Depends(get_db)):
     db.add(art)
     db.commit()
     db.refresh(art)
-    # Publish product created event
     import asyncio
     asyncio.create_task(publish_event({
         "type": "ProductCreated",
@@ -77,5 +75,4 @@ def get_article(article_id: int, db: Session = Depends(get_db)):
 @app.post("/events")
 async def handle_event(req: Request):
     evt = await req.json()
-    # e.g. adjust stock on OrderCreated
     return {"status": "ok"}

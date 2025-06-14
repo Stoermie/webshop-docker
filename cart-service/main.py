@@ -10,7 +10,6 @@ from database import SessionLocal, engine, Base
 from models import Cart, CartItem
 from schemas import CartSchema, CartCreateSchema, CartItemCreateSchema, CartItemSchema
 
-# Event-Bus URL
 EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "http://event_bus:4005")
 
 async def publish_event(event: dict):
@@ -20,15 +19,14 @@ async def publish_event(event: dict):
     except Exception as e:
         print(f"⚠️ Fehler beim Senden an Event-Bus: {e}")
 
-# DB setup
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Cart Service")
 Instrumentator().instrument(app).expose(app)
 
 
 origins = [
-    "http://localhost:3000",          # falls du lokal entwickelst
-    "http://192.168.178.122:30003",   # deine NodePort-Adresse für das Frontend
+    "http://localhost:3000",          
+    "http://192.168.178.122:30003",   
 ]
 
 app.add_middleware(
@@ -39,12 +37,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Health-Check
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
-# Dependency: get database session
+
 def get_db():
     db = SessionLocal()
     try:
@@ -63,7 +61,6 @@ def create_cart(
     db.commit()
     db.refresh(db_cart)
 
-    # Publish event in background
     background_tasks.add_task(
         publish_event,
         {
@@ -94,7 +91,6 @@ def add_item(
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
 
-    # Check if item exists in cart
     existing = db.query(CartItem).filter(
         CartItem.cart_id == cart_id,
         CartItem.article_id == item_in.article_id
@@ -114,7 +110,6 @@ def add_item(
         db.commit()
         db.refresh(new_item)
 
-    # Publish item added event in background
     background_tasks.add_task(
         publish_event,
         {
@@ -144,7 +139,6 @@ def remove_item(
     db.delete(ci)
     db.commit()
 
-    # Publish item removed event in background
     background_tasks.add_task(
         publish_event,
         {
@@ -163,7 +157,6 @@ async def handle_event(
     t = evt.get("type")
     d = evt.get("data", {})
     if t == "OrderCreated":
-        # clear cart when order placed
         db.query(CartItem).filter(CartItem.cart_id == d.get("cart_id")).delete()
         db.commit()
     return {"status": "ok"}

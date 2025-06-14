@@ -1,0 +1,175 @@
+---
+# Catalog-Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-catalog-metrics
+  namespace: webshop
+  labels:
+    app: webshop-catalog
+spec:
+  selector:
+    app.kubernetes.io/name: webshop-catalog
+  ports:
+    - name: metrics
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: webshop-catalog-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: webshop-catalog
+  namespaceSelector:
+    matchNames:
+      - webshop
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+---
+# Cart-Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-cart-metrics
+  namespace: webshop
+  labels:
+    app: webshop-cart
+spec:
+  selector:
+    app.kubernetes.io/name: webshop-cart
+  ports:
+    - name: metrics
+      port: 8002
+      targetPort: 8002
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: webshop-cart-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: webshop-cart
+  namespaceSelector:
+    matchNames:
+      - webshop
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+---
+# Customer-Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-customer-metrics
+  namespace: webshop
+  labels:
+    app: webshop-customer
+spec:
+  selector:
+    app.kubernetes.io/name: webshop-customer
+  ports:
+    - name: metrics
+      port: 8001
+      targetPort: 8001
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: webshop-customer-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: webshop-customer
+  namespaceSelector:
+    matchNames:
+      - webshop
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+---
+# Order-Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-order-metrics
+  namespace: webshop
+  labels:
+    app: webshop-order
+spec:
+  selector:
+    app.kubernetes.io/name: webshop-order
+  ports:
+    - name: metrics
+      port: 8003
+      targetPort: 8003
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: webshop-order-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: webshop-order
+  namespaceSelector:
+    matchNames:
+      - webshop
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+---
+# Eventbus-Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: webshop-eventbus-metrics
+  namespace: webshop
+  labels:
+    app: webshop-eventbus
+spec:
+  selector:
+    app.kubernetes.io/name: webshop-eventbus
+  ports:
+    - name: metrics
+      port: 4005
+      targetPort: 4005
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: webshop-eventbus-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: webshop-eventbus
+  namespaceSelector:
+    matchNames:
+      - webshop
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

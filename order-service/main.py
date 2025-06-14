@@ -12,8 +12,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
 EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "http://event_bus:4005")
 
 origins = [
-    "http://localhost:3000",          # falls du lokal entwickelst
-    "http://192.168.178.122:30003",   # deine NodePort-Adresse für das Frontend
+    "http://localhost:3000",          
+    "http://192.168.178.122:30003",   
 ]
 
 async def publish_event(event: dict):
@@ -34,7 +34,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Health-Check
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -67,6 +66,5 @@ async def handle_event(req: Request, db: Session = Depends(get_db)):
     t = evt.get("type")
     d = evt.get("data", {})
     if t == "CartItemAdded":
-        # example reaction
         pass
     return {"status": "ok"}

@@ -1,4 +1,3 @@
-# order-service/schemas.py
 from pydantic import BaseModel
 from typing import List
 import datetime

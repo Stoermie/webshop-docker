@@ -1,4 +1,3 @@
-# catalog_service/schemas.py
 from pydantic import BaseModel
 from typing import Optional
 
@@ -18,7 +17,6 @@ class ArticleSchema(BaseModel):
 
 
 class ArticleCreateSchema(BaseModel):
-    # dieselben Felder wie beim ArticleSchema, nur ohne article_id
     author: Optional[str] = None
     name: str
     price: float

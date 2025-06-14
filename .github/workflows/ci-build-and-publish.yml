@@ -13,8 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0         # damit wir später committen können
-          persist-credentials: true  # nutzt GITHUB_TOKEN für push
+          fetch-depth: 0         
+          persist-credentials: true  
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -29,7 +29,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # --- jetzt alle Micro-Services multi-arch bauen und pushen ---
       - name: Build & Push frontend
         uses: docker/build-push-action@v6
         with:
@@ -84,7 +83,6 @@ jobs:
           push: true
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/event-service:${{ github.sha }}
 
-      # 4) Helm-Chart updaten: bumpen aller Services auf den neuen SHA
       - name: Bump Helm Chart Image Tags
         run: |
           yq eval -i ".frontend.image.tag   = \"${GITHUB_SHA}\"" helm/webshop/values.yaml
@@ -96,7 +94,6 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
 
-      # 5) Commit & Push updated values.yaml
       - name: Commit Chart Update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -9,7 +9,6 @@ class CartItemBase(BaseModel):
         orm_mode = True
 
 class CartItemCreateSchema(CartItemBase):
-    # request body beim POST /carts/{cart_id}/items
     pass
 
 class CartItemSchema(CartItemBase):
@@ -23,5 +22,4 @@ class CartSchema(BaseModel):
         orm_mode = True
 
 class CartCreateSchema(BaseModel):
-    # POST /carts/ braucht keine Felder aktuell
     pass
