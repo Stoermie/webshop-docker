@@ -13,7 +13,7 @@ EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "http://event_bus:4005")
 
 origins = [
     "http://localhost:3000",          
-    "http://192.168.178.122:30003",   
+    "http://192.168.178.13:30003",   
 ]
 
 async def publish_event(event: dict):

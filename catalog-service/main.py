@@ -22,7 +22,7 @@ async def publish_event(event: dict):
 
 origins = [
     "http://localhost:3000",          
-    "http://192.168.178.122:30003",   
+    "http://192.168.178.13:30003",   
 ]
 
 Base.metadata.create_all(bind=engine)

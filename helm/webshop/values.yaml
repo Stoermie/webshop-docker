@@ -64,11 +64,11 @@ frontend:
     port: 80
     nodePort: 30003
   api:
-    catalog: "http://192.168.178.122:30010/api/articles"
-    cart: "http://192.168.178.122:30011/carts"
-    customer: "http://192.168.178.122:30012/customers"
-    order: "http://192.168.178.122:30013/orders"
-    events: "http://192.168.178.122:30014/events"
+    catalog: "http://192.168.178.13:30010/api/articles"
+    cart: "http://192.168.178.13:30011/carts"
+    customer: "http://192.168.178.13:30012/customers"
+    order: "http://192.168.178.13:30013/orders"
+    events: "http://192.168.178.13:30014/events"
 # PostgreSQL
 postgresql:
   image:

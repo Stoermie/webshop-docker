@@ -10,7 +10,7 @@ Instrumentator().instrument(app).expose(app)
 
 origins = [
     "http://localhost:3000",          
-    "http://192.168.178.122:30003",   
+    "http://192.168.178.13:30003",   
 ]
 
 app.add_middleware(
