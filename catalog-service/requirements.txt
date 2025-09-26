@@ -1,6 +1,6 @@
 fastapi==0.115.12
 uvicorn==0.34.2
-sqlalchemy==2.0.40
+sqlalchemy==2.0.43
 psycopg2-binary==2.9.10
 httpx==0.28.1
 prometheus-fastapi-instrumentator>=6.1.0,<7.0.0
