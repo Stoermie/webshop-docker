@@ -3,7 +3,7 @@ replicaCount: 2
 catalog:
   image:
     repository: docker.io/stoermi/catalog-service
-    tag: 78a8be7ccc9bf24d384835376e26986cfe03be90
+    tag: 9544b618f4f2b4c9743d502de66ab7c56f2c3ecc
   port: 8000
   database: catalog_db
   service:
@@ -14,7 +14,7 @@ catalog:
 cart:
   image:
     repository: docker.io/stoermi/cart-service
-    tag: 78a8be7ccc9bf24d384835376e26986cfe03be90
+    tag: 9544b618f4f2b4c9743d502de66ab7c56f2c3ecc
   port: 8002
   database: cart_db
   service:
@@ -25,7 +25,7 @@ cart:
 customer:
   image:
     repository: docker.io/stoermi/customer-service
-    tag: 78a8be7ccc9bf24d384835376e26986cfe03be90
+    tag: 9544b618f4f2b4c9743d502de66ab7c56f2c3ecc
   port: 8001
   database: customer_db
   service:
@@ -36,7 +36,7 @@ customer:
 order:
   image:
     repository: docker.io/stoermi/order-service
-    tag: 78a8be7ccc9bf24d384835376e26986cfe03be90
+    tag: 9544b618f4f2b4c9743d502de66ab7c56f2c3ecc
   port: 8003
   database: order_db
   service:
@@ -47,7 +47,7 @@ order:
 eventbus:
   image:
     repository: docker.io/stoermi/event-service
-    tag: 78a8be7ccc9bf24d384835376e26986cfe03be90
+    tag: 9544b618f4f2b4c9743d502de66ab7c56f2c3ecc
   port: 4005
   service:
     type: NodePort
@@ -57,7 +57,7 @@ eventbus:
 frontend:
   image:
     repository: docker.io/stoermi/frontend
-    tag: 78a8be7ccc9bf24d384835376e26986cfe03be90
+    tag: 9544b618f4f2b4c9743d502de66ab7c56f2c3ecc
   port: 80
   service:
     type: NodePort
