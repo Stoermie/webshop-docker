@@ -74,7 +74,7 @@ postgresql:
   image:
     registry: docker.io
     repository: postgres
-    tag: 17-alpine
+    tag: 18-alpine
   auth:
     postgresPassword: senta
     username: pidata
